@@ -1,11 +1,14 @@
 import { Context } from 'hono';
-import { db } from '../db/index.js';
-import { users } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
 import { sign } from 'hono/jwt';
-import { setCookie } from 'hono/cookie';
+import { setCookie, deleteCookie } from 'hono/cookie';
+
 import * as bcrypt from 'bcryptjs';
-import { deleteCookie } from 'hono/cookie';
+
+import {
+  findUserByEmail,
+  updateLoginAttempts,
+  resetLoginAttempts
+} from '../repositories/users.repository.js';
 
 export const login = async (c: Context) => {
   const { email, password } = await c.req.json();
@@ -14,7 +17,7 @@ export const login = async (c: Context) => {
     return c.json({ message: 'Email and password required' }, 400);
   }
 
-  const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  const user = await findUserByEmail(email);
 
   if (!user) {
     return c.json({ message: 'Invalid credentials' }, 401);
@@ -35,17 +38,12 @@ export const login = async (c: Context) => {
       lockUntil = new Date(Date.now() + 15 * 60 * 1000);
     }
 
-    await db.update(users)
-      .set({ loginAttempts: attempts >= 5 ? 0 : attempts, lockUntil })
-      .where(eq(users.id, user.id));
+    await updateLoginAttempts(user.id, attempts >= 5 ? 0 : attempts, lockUntil);
 
     return c.json({ message: 'Invalid credentials' }, 401);
   }
 
-  // Reset attempts on success
-  await db.update(users)
-    .set({ loginAttempts: 0, lockUntil: null })
-    .where(eq(users.id, user.id));
+  await resetLoginAttempts(user.id);
 
   const token = await sign({
     id: user.id,
@@ -65,7 +63,6 @@ export const login = async (c: Context) => {
 };
 
 export const logout = async (c: Context) => {
-
   deleteCookie(c, 'auth_token', {
     httpOnly: true,
     path: '/',
