@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.routes.js';
 import projectsRoutes from './routes/projects.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
 import githubRoutes from './routes/github.routes.js';
+import serviceRoutes from './routes/services.routes.js';
 import contactRoutes from './routes/contact.routes.js';
 import educationsRoutes from './routes/educations.routes.js';
 
@@ -29,14 +30,15 @@ app.route('/api/uploads', uploadRoutes);
 app.route('/api/github', githubRoutes);
 app.route('/api/contact', contactRoutes);
 app.route('/api/educations', educationsRoutes);
+app.route('/api/services', serviceRoutes);
 
 app.use('/*', serveStatic({
   root: './public',
   index: 'index.html'
 }));
 
-app.get('/projects/edit/:id', serveStatic({
-  path: './public/projects/edit/index.html'
+app.get('*', serveStatic({
+  path: './public/index.html'
 }));
 
 export default app;

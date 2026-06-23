@@ -3,7 +3,9 @@
   "type": "module",
   "scripts": {
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "test:front": "npm run test --prefix admin-panel",
+    "test:all": "vitest run && npm run test --prefix admin-panel -- --run"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",

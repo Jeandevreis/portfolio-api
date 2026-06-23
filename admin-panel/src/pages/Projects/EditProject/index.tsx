@@ -1,0 +1,56 @@
+import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+
+import { useProjects } from '@/hooks/useProjects';
+
+import Header from '@/components/Header';
+import ProjectForm from '@/components/ProjectForm';
+
+export default function EditProject() {
+  const { t } = useTranslation();
+
+  const { id } = useParams<{ id: string }>();
+  const {
+    form, setForm, imagePreview, submitting, error, loading,
+    handleFileChange, updateTranslation, addTranslation, removeTranslation,
+    updateProject
+  } = useProjects({ editId: id });
+
+  return (
+    <div className="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
+      <Header />
+
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+        </div>
+      ) : (
+        <div className="flex-1 px-8 py-8 w-full">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{t('projects.edit.title')}</h1>
+              <p className="text-sm text-gray-500">{t('projects.edit.description')}</p>
+            </div>
+            <Link to="/projects" className="text-sm text-gray-600 hover:text-blue-600 font-medium flex items-center gap-1 transition-colors">
+              {t('projects.edit.back')}
+            </Link>
+          </div>
+
+          <ProjectForm
+            form={form}
+            setForm={setForm}
+            imagePreview={imagePreview}
+            submitting={submitting}
+            error={error}
+            handleFileChange={handleFileChange}
+            updateTranslation={updateTranslation}
+            addTranslation={addTranslation}
+            removeTranslation={removeTranslation}
+            onSubmitAction={(e) => updateProject(e, id as string)}
+            submitButtonText={t('projects.form.buttons.save')}
+          />
+        </div>
+      )}
+    </div>
+  );
+}

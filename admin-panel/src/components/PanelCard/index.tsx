@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface PanelCardProps {
   title: string;
@@ -19,6 +20,7 @@ export default function PanelCard({
   url = '#',
   className = ''
 }: PanelCardProps) {
+  const { t } = useTranslation();
   const isDisabled = type === 'disabled';
 
   const CardContent = () => (
@@ -46,13 +48,13 @@ export default function PanelCard({
 
         {isDisabled && (
           <span className="absolute top-4 right-4 bg-gray-200 text-gray-500 text-xs px-2 py-1 rounded font-medium">
-            Em breve
+            {t('panel_card.soon')}
           </span>
         )}
 
         {type === 'internal' && (
           <div className="mt-4 text-sm font-medium flex items-center gap-1 group-hover:translate-x-1 transition-transform text-blue-600">
-            Acessar <span className="text-lg">→</span>
+            {t('panel_card.access')} <span className="text-lg">→</span>
           </div>
         )}
       </div>

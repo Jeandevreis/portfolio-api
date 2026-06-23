@@ -1,11 +1,56 @@
 {
   "menu": {},
+  "header": {
+    "title": "Painel Admin",
+    "logout": "Sair",
+    "confirm_logout": "Tem certeza que deseja sair?",
+    "error_logout": "Erro ao sair. Tente novamente."
+  },
+  "buttons": {
+    "back": "Voltar",
+    "save": "Salvar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "add": "Adicionar"
+  },
+  "loader": {
+    "verifying_session": "Verificando sessão..."
+  },
+  "image_selector": {
+    "label": "Imagem (Logo ou Capa)",
+    "preview_alt": "Pré-visualização",
+    "click_to_change": "Clique para trocar",
+    "click_to_upload": "Clique para fazer upload",
+    "file_limits": "PNG, JPG até 5MB"
+  },
+  "panel_card": {
+    "soon": "Em breve",
+    "access": "Acessar"
+  },
   "educations": {
     "type": {
       "college": "Faculdade",
       "course": "Curso Livre",
       "certification": "Certificação",
       "bootcamp": "Bootcamp"
+    },
+    "list": {
+      "back_to_panel": "Voltar ao Painel",
+      "title": "Minhas Formações",
+      "new_education": "Nova Formação",
+      "error_title": "Erro",
+      "empty_title": "Nenhuma formação encontrada",
+      "empty_description": "Comece adicionando seus cursos e faculdades."
+    },
+    "create": {
+      "title": "Nova Formação",
+      "description": "Adicione um novo curso ou faculdade ao seu currículo",
+      "back": "← Voltar para lista"
+    },
+    "edit": {
+      "title": "Editar Formação",
+      "description": "Atualize as informações do curso ou faculdade",
+      "back": "← Voltar para lista"
     },
     "status": {
       "completed": "Concluído",
@@ -17,6 +62,94 @@
       "not_defined": "Não definido",
       "certificate": "📜 Certificado",
       "no_link": "Sem link"
+    },
+    "form": {
+      "labels": {
+        "type": "Tipo de Formação",
+        "status": "Status",
+        "startDate": "Data de Início",
+        "endDate": "Data de Fim (Opcional)",
+        "durationHours": "Carga Horária (Horas)",
+        "certificateUrl": "URL do Certificado",
+        "language": "Idioma",
+        "institution": "Instituição",
+        "name": "Nome da Formação",
+        "description": "Descrição"
+      },
+      "placeholders": {
+        "durationHours": "Ex: 120",
+        "certificateUrl": "https://...",
+        "institution": "Ex: USP, Udemy...",
+        "name": "Ex: Análise de Sistemas",
+        "description": "Descreva o que aprendeu, projetos realizados..."
+      },
+      "titles": {
+        "translations": "Conteúdo & Traduções"
+      },
+      "buttons": {
+        "addLanguage": "+ Adicionar Idioma",
+        "saving": "Salvando...",
+        "save": "Salvar Formação"
+      }
+    },
+    "alt_image": "Imagem do Certificado da formação"
+  },
+  "projects": {
+    "list": {
+      "back_to_panel": "Voltar ao Painel",
+      "title": "Meus Projetos",
+      "new_project": "Novo Projeto",
+      "error_title": "Erro",
+      "empty_title": "Nenhum projeto encontrado.",
+      "empty_description": "Comece adicionando seu primeiro trabalho."
+    },
+    "create": {
+      "title": "Novo Projeto",
+      "description": "Adicione um novo projeto ao seu portfólio",
+      "back": "Voltar para lista"
+    },
+    "edit": {
+      "title": "Editar Projeto",
+      "description": "Atualize as informações do seu projeto",
+      "back": "← Voltar para lista"
+    },
+    "card": {
+      "not_defined": "Sem Título",
+      "image_alt": "Capa do projeto",
+      "no_image": "Sem imagem",
+      "edit": "Editar",
+      "delete": "Excluir",
+      "live": "Ver Online",
+      "offline": "Offline",
+      "repo": "Repositório"
+    },
+    "form": {
+      "labels": {
+        "liveUrl": "URL do Projeto Online",
+        "repoUrl": "URL do Repositório (GitHub, etc)",
+        "language": "Idioma",
+        "title": "Título do Projeto",
+        "description": "Descrição"
+      },
+      "placeholders": {
+        "liveUrl": "https://meusite.com",
+        "repoUrl": "https://github.com/...",
+        "title": "Ex: E-commerce Completo",
+        "description": "Descreva as tecnologias usadas, o objetivo do projeto..."
+      },
+      "titles": {
+        "translations": "Conteúdo & Traduções"
+      },
+      "buttons": {
+        "addLanguage": "+ Adicionar Idioma",
+        "saving": "Salvando...",
+        "save": "Salvar Projeto"
+      }
     }
+  },
+  "languages": {
+    "pt": "🇧🇷 Português",
+    "en": "🇺🇸 English",
+    "es": "🇪🇸 Español"
   }
 }

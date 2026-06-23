@@ -42,7 +42,7 @@ export const createEducationRecord = async (educationData: any, translationsData
   return eduRecord;
 };
 
-export const updateEducationRecord = async (id: string, educationData: any, translationsData: any[]) => {
+export const updateEducationRecord = async (id: any, educationData: any, translationsData: any[]) => {
   await db.update(education)
     .set({
       ...educationData,

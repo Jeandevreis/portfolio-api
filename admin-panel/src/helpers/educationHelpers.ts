@@ -1,5 +1,3 @@
-import { type Education } from '@/hooks/useEducations';
-
 export const getEducationData = (edu: Education, field: 'name' | 'institution', currentLanguage: string) => {
   if (!edu.translations || edu.translations.length === 0) return null;
 

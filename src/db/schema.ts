@@ -25,7 +25,7 @@ export const projects = pgTable('projects', {
 export const projectTranslations = pgTable('project_translations', {
   id: uuid('id').defaultRandom().primaryKey(),
   projectId: uuid('project_id').notNull().references(() => projects.id, { onDelete: 'cascade' }),
-  language: text('language').notNull(), // ex: 'pt', 'en'
+  language: text('language').notNull(),
   title: text('title').notNull(),
   description: text('description').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -99,5 +99,36 @@ export const educationTranslationRelations = relations(educationTranslations, ({
   education: one(education, {
     fields: [educationTranslations.educationId],
     references: [education.id],
+  }),
+}));
+
+export const services = pgTable('services', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  link: text('link'),
+  imageUrl: text('image_url'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const serviceTranslations = pgTable('service_translations', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  serviceId: uuid('service_id')
+    .notNull()
+    .references(() => services.id, { onDelete: 'cascade' }),
+  language: text('language').notNull(), // 'pt', 'en'
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const serviceRelations = relations(services, ({ many }) => ({
+  translations: many(serviceTranslations),
+}));
+
+export const serviceTranslationRelations = relations(serviceTranslations, ({ one }) => ({
+  service: one(services, {
+    fields: [serviceTranslations.serviceId],
+    references: [services.id],
   }),
 }));
