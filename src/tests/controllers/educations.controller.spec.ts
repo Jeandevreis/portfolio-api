@@ -27,6 +27,20 @@ vi.mock('../../repositories/educations.repository.js', () => ({
 describe('Educations Controller', () => {
   let mockContext: any
 
+  const validPayload = {
+    startDate: '2024-01-01',
+    type: 'course',
+    status: 'completed',
+    translations: [
+      {
+        language: 'en',
+        name: 'Web Development',
+        institution: 'Tech Academy',
+        description: 'A comprehensive course on web development'
+      }
+    ]
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
 
@@ -40,24 +54,24 @@ describe('Educations Controller', () => {
   })
 
   describe('getEducations', () => {
-    it('should return a list of educations', async () => {
-      const mockData = [{ id: '1', type: 'Course' }]
+    it('should return a list of educations with status 200', async () => {
+      const mockData = [{ id: '1', type: 'course' }]
       vi.mocked(findAllEducations).mockResolvedValue(mockData as any)
 
       const result = await getEducations(mockContext)
 
       expect(findAllEducations).toHaveBeenCalled()
-      expect(mockContext.json).toHaveBeenCalledWith(mockData)
+      expect(mockContext.json).toHaveBeenCalledWith(mockData, 200)
       expect(result.status).toBe(200)
     })
 
-    it('should return 500 if an error occurs', async () => {
+    it('should return 500 if an error occurs during retrieval', async () => {
       vi.mocked(findAllEducations).mockRejectedValue(new Error('Database error'))
 
       const result = await getEducations(mockContext)
 
       expect(mockContext.json).toHaveBeenCalledWith(
-        { message: 'Erro ao buscar educações', error: 'Database error' },
+        { error: 'educations.error.list', message: 'Database error' },
         500
       )
       expect(result.status).toBe(500)
@@ -65,15 +79,15 @@ describe('Educations Controller', () => {
   })
 
   describe('getEducationById', () => {
-    it('should return the education if found', async () => {
-      const mockData = { id: '1', type: 'Course' }
+    it('should return the education with status 200 if found', async () => {
+      const mockData = { id: '1', type: 'course' }
       mockContext.req.param.mockReturnValue('1')
       vi.mocked(findEducationById).mockResolvedValue(mockData as any)
 
       const result = await getEducationById(mockContext)
 
       expect(findEducationById).toHaveBeenCalledWith('1')
-      expect(mockContext.json).toHaveBeenCalledWith(mockData)
+      expect(mockContext.json).toHaveBeenCalledWith(mockData, 200)
       expect(result.status).toBe(200)
     })
 
@@ -84,20 +98,20 @@ describe('Educations Controller', () => {
       const result = await getEducationById(mockContext)
 
       expect(mockContext.json).toHaveBeenCalledWith(
-        { message: 'Registro de educação não encontrado' },
+        { error: 'educations.error.not_found', message: 'Education record not found' },
         404
       )
       expect(result.status).toBe(404)
     })
 
-    it('should return 500 if an error occurs', async () => {
+    it('should return 500 if an error occurs during retrieval by id', async () => {
       mockContext.req.param.mockReturnValue('1')
       vi.mocked(findEducationById).mockRejectedValue(new Error('Database error'))
 
       const result = await getEducationById(mockContext)
 
       expect(mockContext.json).toHaveBeenCalledWith(
-        { message: 'Erro ao procurar educação', error: 'Database error' },
+        { error: 'educations.error.get_by_id', message: 'Database error' },
         500
       )
       expect(result.status).toBe(500)
@@ -106,27 +120,40 @@ describe('Educations Controller', () => {
 
   describe('createEducation', () => {
     it('should create an education and return 201', async () => {
-      const mockBody = { type: 'Course', translations: [{ language: 'en' }] }
-      const mockCreatedRecord = { id: '1', type: 'Course' }
+      const mockCreatedRecord = { id: '1', ...validPayload }
+      const { translations, ...expectedData } = validPayload
 
-      mockContext.req.json.mockResolvedValue(mockBody)
+      mockContext.req.json.mockResolvedValue(validPayload)
       vi.mocked(createEducationRecord).mockResolvedValue(mockCreatedRecord as any)
 
       const result = await createEducation(mockContext)
 
-      expect(createEducationRecord).toHaveBeenCalledWith({ type: 'Course' }, [{ language: 'en' }])
+      expect(createEducationRecord).toHaveBeenCalledWith(expectedData, translations)
       expect(mockContext.json).toHaveBeenCalledWith(mockCreatedRecord, 201)
       expect(result.status).toBe(201)
     })
 
-    it('should return 500 if creation fails', async () => {
-      mockContext.req.json.mockResolvedValue({})
+    it('should return 422 if the repository fails to create the record', async () => {
+      mockContext.req.json.mockResolvedValue(validPayload)
+      vi.mocked(createEducationRecord).mockResolvedValue(null as any)
+
+      const result = await createEducation(mockContext)
+
+      expect(mockContext.json).toHaveBeenCalledWith(
+        { error: 'educations.error.create', message: 'Education not created' },
+        422
+      )
+      expect(result.status).toBe(422)
+    })
+
+    it('should return 500 if validation or creation throws an error', async () => {
+      mockContext.req.json.mockResolvedValue(validPayload)
       vi.mocked(createEducationRecord).mockRejectedValue(new Error('Creation failed'))
 
       const result = await createEducation(mockContext)
 
       expect(mockContext.json).toHaveBeenCalledWith(
-        { message: 'Erro interno ao salvar educação', error: 'Creation failed' },
+        { error: 'educations.error.create', message: 'Creation failed' },
         500
       )
       expect(result.status).toBe(500)
@@ -134,29 +161,44 @@ describe('Educations Controller', () => {
   })
 
   describe('updateEducation', () => {
-    it('should update an education and return success message', async () => {
+    it('should update an education and return 200 with the updated record', async () => {
       mockContext.req.param.mockReturnValue('1')
-      const mockBody = { type: 'Degree', translations: [{ language: 'pt' }] }
+      const mockUpdatedRecord = { id: '1', ...validPayload }
+      const { translations, ...expectedData } = validPayload
 
-      mockContext.req.json.mockResolvedValue(mockBody)
-      vi.mocked(updateEducationRecord).mockResolvedValue(undefined as any)
+      mockContext.req.json.mockResolvedValue(validPayload)
+      vi.mocked(updateEducationRecord).mockResolvedValue(mockUpdatedRecord as any)
 
       const result = await updateEducation(mockContext)
 
-      expect(updateEducationRecord).toHaveBeenCalledWith('1', { type: 'Degree' }, [{ language: 'pt' }])
-      expect(mockContext.json).toHaveBeenCalledWith({ message: 'Educação atualizada com sucesso' })
+      expect(updateEducationRecord).toHaveBeenCalledWith('1', expectedData, translations)
+      expect(mockContext.json).toHaveBeenCalledWith(mockUpdatedRecord, 200)
       expect(result.status).toBe(200)
     })
 
-    it('should return 500 if update fails', async () => {
+    it('should return 422 if the repository fails to update the record', async () => {
       mockContext.req.param.mockReturnValue('1')
-      mockContext.req.json.mockResolvedValue({})
+      mockContext.req.json.mockResolvedValue(validPayload)
+      vi.mocked(updateEducationRecord).mockResolvedValue(null as any)
+
+      const result = await updateEducation(mockContext)
+
+      expect(mockContext.json).toHaveBeenCalledWith(
+        { error: 'educations.error.update', message: 'Education not updated' },
+        422
+      )
+      expect(result.status).toBe(422)
+    })
+
+    it('should return 500 if validation or update throws an error', async () => {
+      mockContext.req.param.mockReturnValue('1')
+      mockContext.req.json.mockResolvedValue(validPayload)
       vi.mocked(updateEducationRecord).mockRejectedValue(new Error('Update failed'))
 
       const result = await updateEducation(mockContext)
 
       expect(mockContext.json).toHaveBeenCalledWith(
-        { message: 'Erro ao atualizar educação', error: 'Update failed' },
+        { error: 'educations.error.update', message: 'Update failed' },
         500
       )
       expect(result.status).toBe(500)
@@ -164,25 +206,39 @@ describe('Educations Controller', () => {
   })
 
   describe('deleteEducation', () => {
-    it('should delete an education and return success message', async () => {
+    it('should delete an education and return 200 with the deleted record', async () => {
       mockContext.req.param.mockReturnValue('1')
-      vi.mocked(deleteEducationRecord).mockResolvedValue(undefined as any)
+      const mockDeletedRecord = { id: '1' }
+      vi.mocked(deleteEducationRecord).mockResolvedValue(mockDeletedRecord as any)
 
       const result = await deleteEducation(mockContext)
 
       expect(deleteEducationRecord).toHaveBeenCalledWith('1')
-      expect(mockContext.json).toHaveBeenCalledWith({ message: 'Registro de educação removido com sucesso' })
+      expect(mockContext.json).toHaveBeenCalledWith(mockDeletedRecord, 200)
       expect(result.status).toBe(200)
     })
 
-    it('should return 500 if deletion fails', async () => {
+    it('should return 422 if the repository fails to delete the record', async () => {
+      mockContext.req.param.mockReturnValue('1')
+      vi.mocked(deleteEducationRecord).mockResolvedValue(null as any)
+
+      const result = await deleteEducation(mockContext)
+
+      expect(mockContext.json).toHaveBeenCalledWith(
+        { error: 'educations.error.delete', message: 'Education not deleted' },
+        422
+      )
+      expect(result.status).toBe(422)
+    })
+
+    it('should return 500 if deletion throws an error', async () => {
       mockContext.req.param.mockReturnValue('1')
       vi.mocked(deleteEducationRecord).mockRejectedValue(new Error('Deletion failed'))
 
       const result = await deleteEducation(mockContext)
 
       expect(mockContext.json).toHaveBeenCalledWith(
-        { message: 'Erro ao deletar educação', error: 'Deletion failed' },
+        { error: 'educations.error.delete', message: 'Deletion failed' },
         500
       )
       expect(result.status).toBe(500)

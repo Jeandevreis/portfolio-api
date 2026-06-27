@@ -1,11 +1,4 @@
 export const UploadService = {
-  /**
-   * Faz o upload direto para o Cloudinary de forma segura.
-   * @param file O arquivo selecionado pelo usuário
-   * @param folder A pasta de destino permitida no backend (ex: 'users', 'projects')
-   * @param identifier Um identificador único para o arquivo (ex: 'avatar', titulo do projeto)
-   * @returns A URL segura (https) da imagem salva no Cloudinary
-   */
   async uploadImage(file: File, folder: string, identifier: string): Promise<string> {
     const sigRes = await fetch(`/api/uploads/cloudinary-signature?folder=${folder}&identifier=${identifier}`, {
       credentials: 'include'

@@ -1,21 +1,20 @@
-import { Context } from 'hono'
-import { generateSignature } from '../services/cloudinary.service.js'
+import { Context } from 'hono';
 
-const ALLOWED_FOLDERS = ['projects', 'services', 'educations', 'users', 'settings'];
+import { generateSignature } from '../services/cloudinary.service.js';
+import { cloudinarySignatureSchema } from '../schemas/cloudinary.schema.js';
 
 export const getCloudinarySignature = async (c: Context) => {
-  const folder = c.req.query('folder');
-  const identifier = c.req.query('identifier');
+  try {
+    const { folder, identifier } = cloudinarySignatureSchema.parse(await c.req.json());
+    const signatureData = generateSignature(folder, identifier);
 
-  if (!folder || !identifier) {
-    return c.json({ message: 'Parâmetros folder e identifier são obrigatórios.' }, 400);
+    if (!signatureData) return c.json({
+      error: 'cloudinary.error.generate', message: 'Signature generation failed'
+    }, 422);
+
+    return c.json(signatureData, 200);
+
+  } catch (error: any) {
+    return c.json({ error: 'cloudinary.error.signature', message: error.message }, 500);
   }
-
-  if (!ALLOWED_FOLDERS.includes(folder)) {
-    return c.json({ message: 'Pasta de destino não permitida.' }, 403);
-  }
-
-  const signatureData = generateSignature(folder, identifier);
-
-  return c.json(signatureData);
-}
+};

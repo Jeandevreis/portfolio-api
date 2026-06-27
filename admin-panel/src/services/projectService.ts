@@ -1,17 +1,17 @@
 export const ProjectService = {
-  async getAll() {
+  async getAll(): Promise<Project[]> {
     const res = await fetch("/api/projects", { credentials: "include" });
     if (!res.ok) throw new Error("Falha ao buscar dados.");
     return res.json();
   },
 
-  async getById(id: string) {
+  async getById(id: string): Promise<Project> {
     const res = await fetch(`/api/projects/${id}`, { credentials: "include" });
     if (!res.ok) throw new Error("Erro ao buscar projeto.");
     return res.json();
   },
 
-  async create(payload: Partial<Project>) {
+  async create(payload: Partial<Project>): Promise<Project> {
     const res = await fetch('/api/projects', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -22,7 +22,7 @@ export const ProjectService = {
     return res.json();
   },
 
-  async update(id: string, payload: Partial<Project>) {
+  async update(id: string, payload: Partial<Project>): Promise<Project> {
     const res = await fetch(`/api/projects/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -33,7 +33,7 @@ export const ProjectService = {
     return res.json();
   },
 
-  async delete(id: string) {
+  async delete(id: string): Promise<{ message: string }> {
     const res = await fetch(`/api/projects/${id}`, {
       method: 'DELETE',
       credentials: 'include'

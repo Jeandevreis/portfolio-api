@@ -4,9 +4,11 @@ import { eq } from 'drizzle-orm';
 
 type Project = typeof projects.$inferSelect;
 type ProjectTranslation = typeof projectTranslations.$inferSelect;
-type NewProject = typeof projects.$inferInsert;
-
 type GithubStat = typeof githubStats.$inferSelect;
+
+type NewProject = typeof projects.$inferInsert;
+type NewProjectTranslation = typeof projectTranslations.$inferInsert;
+type NewGithubStat = typeof githubStats.$inferInsert;
 
 export const findAllProjects = async (): Promise<Array<Project & { translations: ProjectTranslation[]; githubStats: GithubStat | null }>> => {
   return await db.query.projects.findMany({
@@ -29,66 +31,77 @@ export const findProjectById = async (id: string): Promise<(Project & { translat
 
 export const createProjectRecord = async (
   projectData: NewProject,
-  translations: Omit<ProjectTranslation, 'id' | 'projectId' | 'createdAt' | 'updatedAt'>[],
-  incomingGithubStats?: Omit<GithubStat, 'id' | 'projectId' | 'syncedAt'>
+  translations: Omit<NewProjectTranslation, 'projectId'>[],
+  incomingGithubStats?: Omit<NewGithubStat, 'projectId'>
 ) => {
   return await db.transaction(async (tx) => {
-    const insertedProjects = await tx.insert(projects).values(projectData).returning();
-    const project = insertedProjects[0];
+    const [project] = await tx.insert(projects).values(projectData).returning();
 
-    if (!project) {
-      throw new Error('Falha ao inserir o projeto principal no banco de dados.');
-    }
+    if (!project) return null;
+
+    let insertedTranslations: ProjectTranslation[] = [];
 
     if (translations?.length) {
-      await tx.insert(projectTranslations).values(
+      insertedTranslations = await tx.insert(projectTranslations).values(
         translations.map((t) => ({
           ...t,
           projectId: project.id,
         }))
-      );
+      ).returning();
     }
+
+    let insertedGithubStats: GithubStat | null = null;
 
     if (incomingGithubStats) {
-      await tx.insert(githubStats).values({
+      const [stats] = await tx.insert(githubStats).values({
         ...incomingGithubStats,
         projectId: project.id,
-      });
+      }).returning();
+
+      insertedGithubStats = stats;
     }
 
-    return project;
+    return {
+      ...project,
+      translations: insertedTranslations,
+      githubStats: insertedGithubStats,
+    };
   });
 };
 
 export const updateProjectRecord = async (
   id: string,
-  projectData: Partial<NewProject>,
-  translations: Omit<ProjectTranslation, 'id' | 'projectId' | 'createdAt' | 'updatedAt'>[],
-  incomingGithubStats?: Omit<GithubStat, 'id' | 'projectId' | 'syncedAt'>
+  projectData: NewProject,
+  translations: Omit<NewProjectTranslation, 'projectId'>[],
+  incomingGithubStats?: Omit<NewGithubStat, 'projectId'>
 ) => {
-  await db.transaction(async (tx) => {
-    await tx.update(projects)
-      .set({
-        ...projectData,
-        updatedAt: new Date(),
-      })
-      .where(eq(projects.id, id));
+  return await db.transaction(async (tx) => {
+    const [updatedProject] = await tx.update(projects)
+      .set({ ...projectData, updatedAt: new Date() })
+      .where(eq(projects.id, id))
+      .returning();
+
+    if (!updatedProject) return null;
+
+    let updatedTranslations: ProjectTranslation[] = [];
 
     if (translations && Array.isArray(translations)) {
       await tx.delete(projectTranslations).where(eq(projectTranslations.projectId, id));
 
       if (translations.length > 0) {
-        await tx.insert(projectTranslations).values(
+        updatedTranslations = await tx.insert(projectTranslations).values(
           translations.map((t) => ({
             ...t,
             projectId: id,
           }))
-        );
+        ).returning();
       }
     }
 
+    let updatedGithubStats: GithubStat | null = null;
+
     if (incomingGithubStats) {
-      await tx.insert(githubStats)
+      const [stats] = await tx.insert(githubStats)
         .values({
           ...incomingGithubStats,
           projectId: id,
@@ -100,11 +113,26 @@ export const updateProjectRecord = async (
             ...incomingGithubStats,
             syncedAt: new Date(),
           },
-        });
+        })
+        .returning();
+
+      updatedGithubStats = stats;
     }
+
+    return {
+      ...updatedProject,
+      translations: updatedTranslations,
+      githubStats: updatedGithubStats,
+    };
   });
 };
 
 export const deleteProjectRecord = async (id: string) => {
-  await db.delete(projects).where(eq(projects.id, id));
+  const [deletedProject] = await db.delete(projects)
+    .where(eq(projects.id, id))
+    .returning({ id: projects.id });
+
+  if (!deletedProject) return null;
+
+  return deletedProject;
 };

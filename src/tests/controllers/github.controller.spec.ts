@@ -1,9 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-
 import { syncGithubData, previewGithubData } from '../../controllers/github.controller.js'
-
 import { fetchGithubProjectStats } from '../../services/github.service.js'
-
 import {
   getAllProjectsForSync,
   upsertProjectGithubStats
@@ -26,14 +23,14 @@ describe('GitHub Controller', () => {
 
     mockContext = {
       req: {
-        query: vi.fn()
+        json: vi.fn()
       },
       json: vi.fn((data, status = 200) => ({ data, status }))
     }
   })
 
   describe('syncGithubData', () => {
-    it('should iterate over projects, sync valid ones, and return stats', async () => {
+    it('should iterate over projects, sync valid ones, and return stats with status 200', async () => {
       const mockProjects = [
         { id: '1', repoUrl: 'https://github.com/user/repo1' },
         { id: '2', repoUrl: null },
@@ -54,41 +51,57 @@ describe('GitHub Controller', () => {
       expect(upsertProjectGithubStats).toHaveBeenCalledWith('1', { stars: 10, languages: {}, topics: [] })
 
       expect(mockContext.json).toHaveBeenCalledWith({
-        success: true,
-        updated: 1,
-        failed: 1,
-        message: 'Sincronização finalizada com sucesso'
-      })
+        message: 'Github data synced successfully',
+        data: {
+          updated: 1,
+          failed: 1
+        }
+      }, 200)
+      expect(result.status).toBe(200)
+    })
+
+    it('should return 500 if an error occurs during sync', async () => {
+      vi.mocked(getAllProjectsForSync).mockRejectedValue(new Error('Database error'))
+
+      const result = await syncGithubData(mockContext)
+
+      expect(mockContext.json).toHaveBeenCalledWith(
+        { error: 'github.error.sync', message: 'Database error' },
+        500
+      )
+      expect(result.status).toBe(500)
     })
   })
 
   describe('previewGithubData', () => {
-    it('should return 400 if url query parameter is missing', async () => {
-      mockContext.req.query.mockReturnValue(undefined)
+    it('should return 500 if repoUrl validation fails', async () => {
+      mockContext.req.json.mockResolvedValue({ repoUrl: 'not-a-valid-url' })
 
       const result = await previewGithubData(mockContext)
 
-      expect(result.status).toBe(400)
+      expect(result.status).toBe(500)
       expect(mockContext.json).toHaveBeenCalledWith(
-        { message: 'A URL do repositório é obrigatória' }, 400
+        expect.objectContaining({ error: 'github.error.preview' }),
+        500
       )
     })
 
     it('should return 404 if fetchGithubProjectStats returns null', async () => {
-      mockContext.req.query.mockReturnValue('https://github.com/user/invalid')
+      mockContext.req.json.mockResolvedValue({ repoUrl: 'https://github.com/user/invalid' })
       vi.mocked(fetchGithubProjectStats).mockResolvedValue(null)
 
       const result = await previewGithubData(mockContext)
 
       expect(result.status).toBe(404)
       expect(mockContext.json).toHaveBeenCalledWith(
-        { message: 'Não foi possível encontrar as estatísticas. Verifique se o repositório é público e se a URL está correta.' }, 404
+        { error: 'github.error.not_found', message: 'Repository not found' },
+        404
       )
     })
 
     it('should return 200 and stats if repository is found', async () => {
       const mockStats = { stars: 5, languages: { TS: 100 }, topics: ['react'] }
-      mockContext.req.query.mockReturnValue('https://github.com/user/valid')
+      mockContext.req.json.mockResolvedValue({ repoUrl: 'https://github.com/user/valid' })
       vi.mocked(fetchGithubProjectStats).mockResolvedValue(mockStats as any)
 
       const result = await previewGithubData(mockContext)
@@ -98,14 +111,15 @@ describe('GitHub Controller', () => {
     })
 
     it('should return 500 if an unexpected error occurs', async () => {
-      mockContext.req.query.mockReturnValue('https://github.com/user/valid')
+      mockContext.req.json.mockResolvedValue({ repoUrl: 'https://github.com/user/valid' })
       vi.mocked(fetchGithubProjectStats).mockRejectedValue(new Error('Network error'))
 
       const result = await previewGithubData(mockContext)
 
       expect(result.status).toBe(500)
       expect(mockContext.json).toHaveBeenCalledWith(
-        { message: 'Erro interno ao tentar buscar dados do GitHub', error: 'Network error' }, 500
+        { error: 'github.error.preview', message: 'Network error' },
+        500
       )
     })
   })

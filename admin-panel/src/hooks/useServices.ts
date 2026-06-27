@@ -48,8 +48,9 @@ export function useServices(options?: { fetchList?: boolean; editId?: string }) 
     try {
       const data = await ServiceService.getById(id);
       setForm({
-        ...initialForm,
-        ...data,
+        link: data.link ?? '',
+        imageUrl: data.imageUrl ?? null,
+        translations: data.translations ?? initialForm.translations,
       });
       setImagePreview(data.imageUrl || null);
     } catch (err: any) {

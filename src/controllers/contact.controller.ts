@@ -1,35 +1,22 @@
-import type { Context } from 'hono';
+import { Context } from 'hono';
+
 import { sendContactFormEmail } from '../services/resend.service.js';
+
+import { contactSchema } from '../schemas/contact.schema.js';
 
 export const sendContactEmail = async (c: Context) => {
   try {
-    const body = await c.req.json();
-    const { name, company, email, whatsapp, message } = body;
+    const contactData = contactSchema.parse(await c.req.json());
 
-    if (!name || !company || !message) {
-      return c.json({
-        success: false,
-        message: 'Missing required fields: name, company, or message'
-      }, 400);
-    }
+    const result = await sendContactFormEmail(contactData);
 
-    if (!email && !whatsapp) {
-      return c.json({
-        success: false,
-        message: 'You must provide either an email or a whatsapp number'
-      }, 400);
-    }
+    if (!result.success) return c.json({
+      error: 'contact.error.send', message: result.error
+    }, 422);
 
-    const result = await sendContactFormEmail({ name, company, email, whatsapp, message });
+    return c.json(result.data, 200);
 
-    if (!result.success) {
-      return c.json({ success: false, message: 'Error sending email to the service.' }, 500);
-    }
-
-    return c.json({ success: true, message: 'Email sent successfully!', data: result.data });
-
-  } catch (error) {
-    console.error('Error in contact controller:', error);
-    return c.json({ success: false, message: 'Internal server error.' }, 500);
+  } catch (error: any) {
+    return c.json({ error: 'contact.error.send', message: error.message }, 500);
   }
 };

@@ -10,4 +10,6 @@ interface Project {
   liveUrl: string;
   repoUrl: string;
   translations: ProjectTranslation[];
+  createdAt?: string;
+  updatedAt?: string;
 }

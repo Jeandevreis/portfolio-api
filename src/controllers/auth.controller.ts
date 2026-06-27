@@ -4,28 +4,23 @@ import { setCookie, deleteCookie } from 'hono/cookie';
 
 import * as bcrypt from 'bcryptjs';
 
+import { loginSchema } from '../schemas/auth.schema.js';
+
 import {
   findUserByEmail,
   updateLoginAttempts,
-  resetLoginAttempts
+  resetLoginAttempts,
+  findUserById
 } from '../repositories/users.repository.js';
 
 export const login = async (c: Context) => {
-  const { email, password } = await c.req.json();
-
-  if (!email || !password) {
-    return c.json({ message: 'Email and password required' }, 400);
-  }
+  const { email, password } = loginSchema.parse(await c.req.json());
 
   const user = await findUserByEmail(email);
+  if (!user) return c.json({ error: 'login.error.credentials', message: 'Invalid credentials' }, 401);
 
-  if (!user) {
-    return c.json({ message: 'Invalid credentials' }, 401);
-  }
-
-  // Lock check
   if (user.lockUntil && new Date(user.lockUntil) > new Date()) {
-    return c.json({ message: 'Account temporarily locked' }, 429);
+    return c.json({ error: 'login.error.locked', message: 'Account temporarily locked' }, 429);
   }
 
   const passwordValid = await bcrypt.compare(password, user.passwordHash);
@@ -40,7 +35,7 @@ export const login = async (c: Context) => {
 
     await updateLoginAttempts(user.id, attempts >= 5 ? 0 : attempts, lockUntil);
 
-    return c.json({ message: 'Invalid credentials' }, 401);
+    return c.json({ error: 'login.error.credentials', message: 'Invalid credentials' }, 401);
   }
 
   await resetLoginAttempts(user.id);
@@ -59,7 +54,7 @@ export const login = async (c: Context) => {
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  return c.json({ message: 'Logged in' });
+  return c.json({ success: true, message: 'Logged in' });
 };
 
 export const logout = async (c: Context) => {
@@ -74,4 +69,18 @@ export const logout = async (c: Context) => {
     success: true,
     message: 'Logged out successfully'
   });
+};
+
+export const me = async (c: Context) => {
+  const payload = c.get('jwtPayload');
+
+  const user = await findUserById(payload.id);
+
+  if (!user) {
+    return c.json({ error: 'auth.error.userNotFound', message: 'User not found' }, 404);
+  }
+
+  const { passwordHash, lockUntil, loginAttempts, ...safeUser } = user;
+
+  return c.json(safeUser);
 };

@@ -8,61 +8,70 @@ import {
   deleteServiceRecord
 } from '../repositories/services.repository.js';
 
+import { serviceSchema } from '../schemas/services.schema.js';
+
 export const getServices = async (c: Context) => {
   try {
     const result = await findAllServices()
-    return c.json(result)
+    return c.json(result, 200)
+
   } catch (error: any) {
-    return c.json({ message: 'Erro ao buscar serviços', error: error.message }, 500)
+    return c.json({ error: 'services.error.list', message: error.message }, 500)
   }
 }
 
 export const getServiceById = async (c: Context) => {
-  const id = c.req.param('id')
+  const id = c.req.param('id');
 
   try {
-    const service = await findServiceById(id)
+    const service = await findServiceById(id);
 
-    if (!service) {
-      return c.json({ message: 'Serviço não encontrado' }, 404)
-    }
+    if (!service) return c.json({
+      error: 'services.error.not_found', message: 'Service not found'
+    }, 404);
 
-    return c.json(service)
+    return c.json(service, 200);
+
   } catch (error: any) {
-    return c.json({ message: 'Erro ao procurar serviço', error: error.message }, 500)
+    return c.json({ error: 'services.error.get_by_id', message: error.message }, 500);
   }
-}
+};
 
 export const createService = async (c: Context) => {
   try {
-    const body = await c.req.json()
-    const { translations, ...serviceData } = body
+    const { translations, ...service } = serviceSchema.parse(await c.req.json());
 
-    const service = await createServiceRecord(serviceData, translations)
+    const newService = await createServiceRecord(service, translations);
 
-    return c.json(service, 201)
+    if (!newService) return c.json({
+      error: 'services.error.create', message: 'Service not created'
+    }, 422);
+
+    return c.json(newService, 201);
+
   } catch (error: any) {
-    console.error('ERRO AO CRIAR SERVIÇO:', error)
-    return c.json({
-      message: 'Erro interno ao salvar serviço',
-      error: error.message
-    }, 500)
+    return c.json({ error: 'services.error.create', message: error.message }, 500);
   }
-}
+};
 
 export const updateService = async (c: Context) => {
   const id = c.req.param('id')
 
   try {
-    const body = await c.req.json()
-    const { translations, ...serviceData } = body
+    const { translations, ...service } = serviceSchema.parse(await c.req.json());
 
-    await updateServiceRecord(id, serviceData, translations)
+    console.log(service, translations);
 
-    return c.json({ message: 'Serviço atualizado com sucesso' })
+    const updatedService = await updateServiceRecord(id, service, translations);
+
+    if (!updatedService) return c.json({
+      error: 'services.error.update', message: 'Service not updated'
+    }, 422);
+
+    return c.json(updatedService, 200);
+
   } catch (error: any) {
-    console.error('ERRO AO ATUALIZAR SERVIÇO:', error)
-    return c.json({ message: 'Erro ao atualizar serviço', error: error.message }, 500)
+    return c.json({ error: 'services.error.update', message: error.message }, 500);
   }
 }
 
@@ -70,9 +79,15 @@ export const deleteService = async (c: Context) => {
   const id = c.req.param('id')
 
   try {
-    await deleteServiceRecord(id)
-    return c.json({ message: 'Serviço removido com sucesso' })
+    const deletedService = await deleteServiceRecord(id);
+
+    if (!deletedService) return c.json({
+      error: 'services.error.delete', message: 'Service not deleted'
+    }, 422);
+
+    return c.json(deletedService, 200);
+
   } catch (error: any) {
-    return c.json({ message: 'Erro ao remover serviço', error: error.message }, 500)
+    return c.json({ error: 'services.error.delete', message: error.message }, 500);
   }
 }

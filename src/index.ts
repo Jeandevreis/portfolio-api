@@ -3,6 +3,8 @@ import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
 import { serveStatic } from '@hono/node-server/serve-static'
 
+import { i18nMiddleware } from './middlewares/i18n.js';
+
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
 import projectsRoutes from './routes/projects.routes.js';
@@ -14,6 +16,8 @@ import educationsRoutes from './routes/educations.routes.js';
 
 type Variables = {
   jwtPayload: any;
+  language: string
+  t: (key: string, options?: Record<string, any>) => string
 };
 
 const app = new Hono<{ Variables: Variables }>();
@@ -24,6 +28,8 @@ app.use('*', cors({
   origin: (origin) => origin,
   credentials: true,
 }));
+
+app.use('*', i18nMiddleware);
 
 app.route('/auth', authRoutes);
 app.route('/api/user', userRoutes);

@@ -1,0 +1,6 @@
+{
+  "auth": {
+    "invalid_email": "Formato de correo electrónico inválido",
+    "password_too_short": "La contraseña debe tener al menos 6 caracteres"
+  }
+}

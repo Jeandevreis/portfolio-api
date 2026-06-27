@@ -15,4 +15,6 @@ interface Education {
   endDate?: string;
   certificateUrl?: string;
   translations: EducationTranslation[];
+  createdAt?: string;
+  updatedAt?: string;
 }

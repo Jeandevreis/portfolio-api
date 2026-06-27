@@ -1,6 +1,6 @@
 export const UserService = {
-  async updateProfile(payload: { name: string; email: string; avatarUrl?: string | null }) {
-    const res = await fetch('/api/users/profile', {
+  async updateProfile(payload: Partial<User>): Promise<User> {
+    const res = await fetch('/api/user/profile', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -16,8 +16,8 @@ export const UserService = {
     return data;
   },
 
-  async updatePassword(payload: { oldPassword: string; newPassword: string }) {
-    const res = await fetch('/api/users/password', {
+  async updatePassword(payload: Pick<PasswordForm, 'oldPassword' | 'newPassword'>): Promise<User> {
+    const res = await fetch('/api/user/password', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',

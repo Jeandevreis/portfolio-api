@@ -1,17 +1,17 @@
 export const ServiceService = {
-  async getAll() {
+  async getAll(): Promise<Service[]> {
     const res = await fetch("/api/services", { credentials: "include" });
     if (!res.ok) throw new Error("Falha ao buscar dados.");
     return res.json();
   },
 
-  async getById(id: string) {
+  async getById(id: string): Promise<Service> {
     const res = await fetch(`/api/services/${id}`, { credentials: "include" });
     if (!res.ok) throw new Error("Erro ao buscar serviço.");
     return res.json();
   },
 
-  async create(payload: Partial<Service>) {
+  async create(payload: Partial<Service>): Promise<Service> {
     const res = await fetch('/api/services', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -22,7 +22,7 @@ export const ServiceService = {
     return res.json();
   },
 
-  async update(id: string, payload: Partial<Service>) {
+  async update(id: string, payload: Partial<Service>): Promise<Service> {
     const res = await fetch(`/api/services/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -33,7 +33,7 @@ export const ServiceService = {
     return res.json();
   },
 
-  async delete(id: string) {
+  async delete(id: string): Promise<{ message: string }> {
     const res = await fetch(`/api/services/${id}`, {
       method: 'DELETE',
       credentials: 'include'
