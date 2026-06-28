@@ -1,12 +1,16 @@
 export const UploadService = {
   async uploadImage(file: File, folder: string, identifier: string): Promise<string> {
-    const sigRes = await fetch(`/api/uploads/cloudinary-signature?folder=${folder}&identifier=${identifier}`, {
-      credentials: 'include'
+
+    const sigRes = await fetch('/api/uploads/cloudinary-signature', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ folder, identifier })
     });
 
     if (!sigRes.ok) {
       const errorData = await sigRes.json().catch(() => ({}));
-      throw new Error(errorData.message || 'Erro ao gerar assinatura de upload.');
+      throw { error: errorData.error || 'services.error.upload_signature' };
     }
 
     const { cloudName, apiKey, timestamp, signature, publicId } = await sigRes.json();
@@ -24,7 +28,7 @@ export const UploadService = {
     });
 
     if (!uploadRes.ok) {
-      throw new Error('Falha ao enviar imagem para o Cloudinary.');
+      throw { error: 'services.error.upload_failed' };
     }
 
     const uploadData = await uploadRes.json();

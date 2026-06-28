@@ -71,7 +71,7 @@ export const education = pgTable('education', {
   id: uuid('id').defaultRandom().primaryKey(),
   startDate: date('start_date').notNull(),
   endDate: date('end_date'),
-  type: text('type').$type<'college' | 'course' | 'certification'>().notNull(),
+  type: text('type').$type<'college' | 'course' | 'certification' | 'bootcamp'>().notNull(),
   durationHours: integer('duration_hours'),
   imageUrl: text('image_url'),
   certificateUrl: text('certificate_url'),

@@ -10,9 +10,10 @@ export default function CreateService() {
   const { t } = useTranslation();
 
   const {
-    form, setForm, imagePreview, submitting, error,
-    handleFileChange, updateTranslation, addTranslation, removeTranslation,
-    createService
+    imagePreview, handleFileChange,
+    isSubmitting, globalError,
+    createService,
+    register, errors, fields, appendTranslation, removeTranslation
   } = useServices();
 
   return (
@@ -22,26 +23,33 @@ export default function CreateService() {
       <main className="flex-1 px-8 py-8 w-full">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('services.create.title', { defaultValue: 'Criar Novo Serviço' })}</h1>
-            <h2 className="text-sm text-gray-500">{t('services.create.description', { defaultValue: 'Preencha os detalhes abaixo para adicionar um novo serviço ao seu catálogo.' })}</h2>
+
+            <h1 className="text-2xl font-bold text-gray-900">
+              {t('services.page.create.title', { defaultValue: 'Create new service' })}
+            </h1>
+
+            <h2 className="text-sm text-gray-500">
+              {t('services.page.create.description', { defaultValue: 'Create a new service to be displayed on the website.' })}
+            </h2>
+
           </div>
           <Link to="/services" className="text-sm text-gray-600 hover:text-blue-600 font-medium flex items-center gap-1 transition-colors">
-            ← {t('services.create.back', { defaultValue: 'Voltar para serviços' })}
+            ← {t('services.buttons.back_to_services', { defaultValue: 'Back to services' })}
           </Link>
         </div>
 
         <ServiceForm
-          form={form}
-          setForm={setForm}
-          imagePreview={imagePreview}
-          submitting={submitting}
-          error={error}
-          handleFileChange={handleFileChange}
-          updateTranslation={updateTranslation}
-          addTranslation={addTranslation}
+          register={register}
+          errors={errors}
+          fields={fields}
+          appendTranslation={appendTranslation}
           removeTranslation={removeTranslation}
+          imagePreview={imagePreview}
+          isSubmitting={isSubmitting}
+          globalError={globalError}
+          handleFileChange={handleFileChange}
           onSubmitAction={createService}
-          submitButtonText={t('services.form.buttons.save', { defaultValue: 'Salvar Serviço' })}
+          submitButtonText={t('services.buttons.save_service', { defaultValue: 'Save service' })}
         />
       </main>
     </div>

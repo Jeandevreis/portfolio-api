@@ -7,11 +7,184 @@
     "error_logout": "Erro ao sair. Tente novamente."
   },
   "buttons": {
+    "back_to_panel": "Voltar ao Painel",
+    "add_language": "+ Adicionar Idioma",
+    "saving": "Salvando...",
     "back": "Voltar",
     "save": "Salvar",
     "edit": "Editar",
     "delete": "Excluir",
     "add": "Adicionar"
+  },
+  "projects": {
+    "page": {
+      "list": {
+        "title": "Projetos",
+        "error_title": "Erro",
+        "empty_list_title": "Nenhum projeto encontrado.",
+        "empty_list_description": "Cadastre seu primeiro projeto para vê-lo aqui."
+      },
+      "create": {
+        "title": "Criar Novo Projeto",
+        "description": "Preencha os detalhes abaixo para adicionar um novo projeto ao seu catálogo."
+      },
+      "edit": {
+        "title": "Editar Projeto",
+        "description": "Atualize as informações do seu projeto."
+      }
+    },
+    "cards": {
+      "no_image": "Nenhuma imagem",
+      "image_alt": "Imagem do projeto",
+      "live_url": "Ver Online",
+      "repo_url": "Repositório"
+    },
+    "buttons": {
+      "new_project": "Novo Projeto",
+      "back_to_projects": "Voltar para projetos",
+      "save_project": "Salvar Projeto"
+    },
+    "form": {
+      "titles": {
+        "translations": "Traduções & Conteúdo"
+      },
+      "labels": {
+        "liveUrl": "URL do Projeto",
+        "repoUrl": "URL do Repositório",
+        "language": "Idioma",
+        "title": "Título do Projeto",
+        "description": "Descrição do Projeto"
+      },
+      "placeholders": {
+        "live_url": "https://myproject.com/",
+        "repo_url": "https://github.com/...",
+        "title": "Ex: Desenvolvimento de Site",
+        "description": "Descreva detalhadamente o que este projeto oferece..."
+      }
+    },
+    "error": {
+      "live_url": "URL inválida",
+      "repo_url": "URL inválida",
+      "title": "Título inválido - Obrigatório",
+      "description": "Descrição inválida - Obrigatório"
+    }
+  },
+  "educations": {
+    "page": {
+      "list": {
+        "title": "Formações",
+        "error_title": "Erro",
+        "empty_list_title": "Nenhuma formação encontrada.",
+        "empty_list_description": "Cadastre sua primeira formação para vê-la aqui."
+      },
+      "create": {
+        "title": "Criar Nova Formação",
+        "description": "Preencha os detalhes abaixo para adicionar uma nova formação."
+      },
+      "edit": {
+        "title": "Editar Formação",
+        "description": "Atualize as informações da sua formação."
+      }
+    },
+    "cards": {
+      "no_image": "Nenhuma imagem",
+      "image_alt": "Imagem da formação",
+      "certificate_url": "Certificado"
+    },
+    "buttons": {
+      "new_education": "Nova Formação",
+      "back_to_educations": "Voltar para formações",
+      "save_education": "Salvar Formação"
+    },
+    "form": {
+      "titles": {
+        "translations": "Traduções & Conteúdo"
+      },
+      "labels": {
+        "type": "Tipo de Formação",
+        "status": "Status",
+        "startDate": "Data de Início",
+        "endDate": "Data de Fim",
+        "duration": "Duração (em horas)",
+        "institution": "Instituição",
+        "course_name": "Nome da Formação",
+        "description": "Descrição da Formação",
+        "certificate_url": "URL do Certificado",
+        "language": "Idioma"
+      },
+      "placeholders": {
+        "duration": "Ex: 100",
+        "certificate_url": "https://mycertificate.com/xxxxxx",
+        "institution": "Ex: Harvard University",
+        "course_name": "Ex: Ciência de Dados",
+        "description": "Descreva detalhadamente a formação..."
+      }
+    },
+    "error": {
+      "start_date": "Data inválida - Obrigatório",
+      "end_date": "Data inválida",
+      "duration": "Duração inválida - Obrigatório",
+      "institution": "Instituição inválida - Obrigatório",
+      "name": "Nome da formação inválida - Obrigatório",
+      "description": "Descrição inválida - Obrigatório",
+      "certificate_url": "URL inválida"
+    },
+    "type": {
+      "college": "Faculdade",
+      "course": "Curso",
+      "certification": "Certificação",
+      "bootcamp": "Bootcamp"
+    },
+    "status": {
+      "completed": "Concluído",
+      "in_progress": "Em andamento",
+      "paused": "Pausado"
+    }
+  },
+  "services": {
+    "page": {
+      "list": {
+        "title": "Serviços",
+        "error_title": "Erro",
+        "empty_list_title": "Nenhum serviço encontrado.",
+        "empty_list_description": "Cadastre seu primeiro serviço para vê-lo aqui."
+      },
+      "create": {
+        "title": "Criar Novo Serviço",
+        "description": "Preencha os detalhes abaixo para adicionar um novo serviço ao seu catálogo."
+      },
+      "edit": {
+        "title": "Editar Serviço",
+        "description": "Atualize as informações do seu serviço."
+      }
+    },
+    "buttons": {
+      "new_service": "Novo Serviço",
+      "back_to_services": "Voltar para serviços",
+      "save_service": "Salvar Serviço"
+    },
+    "form": {
+      "titles": {
+        "translations": "Traduções & Conteúdo"
+      },
+      "labels": {
+        "link": "Link do Serviço",
+        "info_link": "* Opcional: Insira um link externo para mais detalhes ou contratação.",
+        "language": "Idioma",
+        "title": "Título do Serviço",
+        "description": "Descrição do Serviço"
+      },
+      "placeholders": {
+        "link": "https://",
+        "title": "Ex: Desenvolvimento de Site",
+        "description": "Descreva detalhadamente o que este serviço oferece..."
+      }
+    },
+    "error": {
+      "link": "URL inválida",
+      "title": "Título inválido - Obrigatório",
+      "description": "Descrição inválida - Obrigatório"
+    }
   },
   "loader": {
     "verifying_session": "Verificando sessão..."
@@ -26,126 +199,6 @@
   "panel_card": {
     "soon": "Em breve",
     "access": "Acessar"
-  },
-  "educations": {
-    "type": {
-      "college": "Faculdade",
-      "course": "Curso Livre",
-      "certification": "Certificação",
-      "bootcamp": "Bootcamp"
-    },
-    "list": {
-      "back_to_panel": "Voltar ao Painel",
-      "title": "Minhas Formações",
-      "new_education": "Nova Formação",
-      "error_title": "Erro",
-      "empty_title": "Nenhuma formação encontrada",
-      "empty_description": "Comece adicionando seus cursos e faculdades."
-    },
-    "create": {
-      "title": "Nova Formação",
-      "description": "Adicione um novo curso ou faculdade ao seu currículo",
-      "back": "← Voltar para lista"
-    },
-    "edit": {
-      "title": "Editar Formação",
-      "description": "Atualize as informações do curso ou faculdade",
-      "back": "← Voltar para lista"
-    },
-    "status": {
-      "completed": "Concluído",
-      "in_progress": "Cursando",
-      "paused": "Pausado"
-    },
-    "card": {
-      "no_image": "Sem imagem",
-      "not_defined": "Não definido",
-      "certificate": "📜 Certificado",
-      "no_link": "Sem link"
-    },
-    "form": {
-      "labels": {
-        "type": "Tipo de Formação",
-        "status": "Status",
-        "startDate": "Data de Início",
-        "endDate": "Data de Fim (Opcional)",
-        "durationHours": "Carga Horária (Horas)",
-        "certificateUrl": "URL do Certificado",
-        "language": "Idioma",
-        "institution": "Instituição",
-        "name": "Nome da Formação",
-        "description": "Descrição"
-      },
-      "placeholders": {
-        "durationHours": "Ex: 120",
-        "certificateUrl": "https://...",
-        "institution": "Ex: USP, Udemy...",
-        "name": "Ex: Análise de Sistemas",
-        "description": "Descreva o que aprendeu, projetos realizados..."
-      },
-      "titles": {
-        "translations": "Conteúdo & Traduções"
-      },
-      "buttons": {
-        "addLanguage": "+ Adicionar Idioma",
-        "saving": "Salvando...",
-        "save": "Salvar Formação"
-      }
-    },
-    "alt_image": "Imagem do Certificado da formação"
-  },
-  "projects": {
-    "list": {
-      "back_to_panel": "Voltar ao Painel",
-      "title": "Meus Projetos",
-      "new_project": "Novo Projeto",
-      "error_title": "Erro",
-      "empty_title": "Nenhum projeto encontrado.",
-      "empty_description": "Comece adicionando seu primeiro trabalho."
-    },
-    "create": {
-      "title": "Novo Projeto",
-      "description": "Adicione um novo projeto ao seu portfólio",
-      "back": "Voltar para lista"
-    },
-    "edit": {
-      "title": "Editar Projeto",
-      "description": "Atualize as informações do seu projeto",
-      "back": "← Voltar para lista"
-    },
-    "card": {
-      "not_defined": "Sem Título",
-      "image_alt": "Capa do projeto",
-      "no_image": "Sem imagem",
-      "edit": "Editar",
-      "delete": "Excluir",
-      "live": "Ver Online",
-      "offline": "Offline",
-      "repo": "Repositório"
-    },
-    "form": {
-      "labels": {
-        "liveUrl": "URL do Projeto Online",
-        "repoUrl": "URL do Repositório (GitHub, etc)",
-        "language": "Idioma",
-        "title": "Título do Projeto",
-        "description": "Descrição"
-      },
-      "placeholders": {
-        "liveUrl": "https://meusite.com",
-        "repoUrl": "https://github.com/...",
-        "title": "Ex: E-commerce Completo",
-        "description": "Descreva as tecnologias usadas, o objetivo do projeto..."
-      },
-      "titles": {
-        "translations": "Conteúdo & Traduções"
-      },
-      "buttons": {
-        "addLanguage": "+ Adicionar Idioma",
-        "saving": "Salvando...",
-        "save": "Salvar Projeto"
-      }
-    }
   },
   "languages": {
     "pt": "🇧🇷 Português",

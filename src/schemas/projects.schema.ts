@@ -16,19 +16,16 @@ export const projectSchema = z.object({
   imageUrl: z.url({ error: 'projects.error.image_url' })
     .startsWith('http', { message: 'projects.error.image_url' })
     .optional()
-    .nullable()
     .or(z.literal('')),
 
   liveUrl: z.url({ error: 'projects.error.live_url' })
     .startsWith('http', { message: 'projects.error.live_url' })
     .optional()
-    .nullable()
     .or(z.literal('')),
 
   repoUrl: z.url({ error: 'projects.error.repo_url' })
     .startsWith('http', { message: 'projects.error.repo_url' })
     .optional()
-    .nullable()
     .or(z.literal('')),
 
   translations: z.array(projectTranslationSchema).min(1, { error: 'projects.error.translations_required' }),

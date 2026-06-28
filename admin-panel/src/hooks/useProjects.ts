@@ -1,22 +1,34 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { ProjectService } from '@/services/projectService';
 import { UploadService } from '@/services/uploadService';
 
 import { useImagePreview } from '@/hooks/useImagePreview';
 
-const initialForm: Project = {
+import { z } from 'zod';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import { projectSchema } from '../../../src/schemas/projects.schema';
+
+type ProjectFormData = z.infer<typeof projectSchema>;
+
+const initialForm: ProjectFormData = {
   liveUrl: '',
   repoUrl: '',
+  imageUrl: '',
   translations: [{ language: 'pt', title: '', description: '' }]
 };
 
 export function useProjects(options?: { fetchList?: boolean; editId?: string }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [projects, setProjects] = useState<Project[]>([]);
-  const [form, setForm] = useState<Project>(initialForm);
+  const [loading, setLoading] = useState(!!options?.fetchList || !!options?.editId);
+  const [globalError, setGlobalError] = useState<string | null>(null);
 
   const {
     imagePreview,
@@ -26,9 +38,21 @@ export function useProjects(options?: { fetchList?: boolean; editId?: string }) 
     handleFileChange
   } = useImagePreview();
 
-  const [loading, setLoading] = useState<boolean>(!!options?.fetchList || !!options?.editId);
-  const [submitting, setSubmitting] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting }
+  } = useForm<ProjectFormData>({
+    resolver: zodResolver(projectSchema),
+    defaultValues: initialForm
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'translations'
+  });
 
   const loadProjects = useCallback(async () => {
     setLoading(true);
@@ -36,28 +60,41 @@ export function useProjects(options?: { fetchList?: boolean; editId?: string }) 
       const data = await ProjectService.getAll();
       setProjects(data);
     } catch (err: any) {
-      setError(err.message || "Não foi possível carregar os projetos.");
+      const errorKey = err.error || err.message;
+      setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const loadProjectForEdit = useCallback(async (id: string) => {
     setLoading(true);
     try {
       const data = await ProjectService.getById(id);
-      setForm({
-        ...initialForm,
-        ...data,
+
+      const cleanTranslations = data.translations?.length
+        ? data.translations.map((tData: any) => ({
+          language: tData.language,
+          title: tData.title,
+          description: tData.description
+        }))
+        : initialForm.translations;
+
+      reset({
+        liveUrl: data.liveUrl ?? '',
+        repoUrl: data.repoUrl ?? '',
+        imageUrl: data.imageUrl ?? '',
+        translations: cleanTranslations,
       });
-      // Seta a imagem que veio do banco no preview
+
       setImagePreview(data.imageUrl || null);
     } catch (err: any) {
-      setError(err.message || "Erro ao carregar dados.");
+      const errorKey = err.error || err.message;
+      setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     } finally {
       setLoading(false);
     }
-  }, [setImagePreview]);
+  }, [reset, setImagePreview, t]);
 
   useEffect(() => {
     if (options?.fetchList) loadProjects();
@@ -65,87 +102,63 @@ export function useProjects(options?: { fetchList?: boolean; editId?: string }) 
   }, [options?.fetchList, options?.editId, loadProjects, loadProjectForEdit]);
 
   const deleteProject = async (id: string) => {
-    if (!window.confirm("Tem certeza que deseja apagar este projeto?")) return;
+    if (!window.confirm(t('projects.list.confirm_delete', { defaultValue: 'Tem certeza que deseja apagar este projeto?' }))) return;
+
     try {
       await ProjectService.delete(id);
       setProjects(prev => prev.filter(p => p.id !== id));
     } catch (err: any) {
-      alert(err.message || "Erro ao excluir.");
+      const errorKey = err.error || err.message;
+      alert(errorKey ? t(errorKey) : t('api.error.unknown'));
     }
   };
 
-  const getPayload = (finalImageUrl?: string) => {
-    if (!form.translations[0]?.title?.trim()) throw new Error('O título em Português é obrigatório.');
-
-    return {
-      liveUrl: form.liveUrl,
-      repoUrl: form.repoUrl,
-      translations: form.translations,
-      imageUrl: finalImageUrl ?? undefined,
-    };
-  };
-
-  const createProject = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setError(null);
+  const processFormSubmit = async (data: ProjectFormData, id?: string) => {
+    setGlobalError(null);
     try {
-      let finalImageUrl = imagePreview || undefined;
+      let finalImageUrl = imagePreview || '';
 
       if (selectedFile) {
-        finalImageUrl = await UploadService.uploadImage(selectedFile, 'projects', `proj-${Date.now()}`);
+        const fileId = id || Date.now().toString();
+        finalImageUrl = await UploadService.uploadImage(selectedFile, 'projects', `proj-${fileId}`);
       }
 
-      await ProjectService.create(getPayload(finalImageUrl));
+      const payload = { ...data, imageUrl: finalImageUrl };
+
+      if (id) {
+        await ProjectService.update(id, payload);
+      } else {
+        await ProjectService.create(payload);
+      }
 
       setSelectedFile(null);
       navigate('/projects');
     } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
+      console.error("ERRO COMPLETO CAPTURADO NO CATCH:", err);
+      const errorKey = err.error || err.message;
+      setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     }
   };
 
-  const updateProject = async (e: React.FormEvent<HTMLFormElement>, id: string) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setError(null);
-    try {
-      let finalImageUrl = imagePreview || undefined;
-
-      if (selectedFile) {
-        finalImageUrl = await UploadService.uploadImage(selectedFile, 'projects', `proj-${id}`);
-      }
-
-      await ProjectService.update(id, getPayload(finalImageUrl));
-
-      setSelectedFile(null);
-      navigate('/projects');
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const updateTranslation = (index: number, field: keyof ProjectTranslation, value: string) => {
-    const newTranslations = [...form.translations];
-    newTranslations[index] = { ...newTranslations[index], [field]: value };
-    setForm({ ...form, translations: newTranslations });
-  };
-
-  const addTranslation = () => {
-    setForm({ ...form, translations: [...form.translations, { language: 'en', title: '', description: '' }] });
-  };
-
-  const removeTranslation = (index: number) => {
-    setForm({ ...form, translations: form.translations.filter((_, i) => i !== index) });
-  };
+  const createProject = handleSubmit((data) => processFormSubmit(data));
+  const updateProject = (id: string) => handleSubmit((data) => processFormSubmit(data, id));
 
   return {
-    projects, form, setForm, imagePreview, selectedFile, loading, submitting, error,
-    deleteProject, createProject, updateProject,
-    updateTranslation, addTranslation, removeTranslation, handleFileChange
+    projects,
+    loading,
+    globalError,
+    deleteProject,
+    createProject,
+    updateProject,
+
+    register,
+    errors,
+    isSubmitting,
+    fields,
+    appendTranslation: () => append({ language: 'en', title: '', description: '' }),
+    removeTranslation: remove,
+
+    imagePreview,
+    handleFileChange
   };
 }

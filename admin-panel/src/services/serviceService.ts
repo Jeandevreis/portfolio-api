@@ -1,14 +1,14 @@
+import { handleResponse } from '@/helpers/fetchHelpers';
+
 export const ServiceService = {
   async getAll(): Promise<Service[]> {
-    const res = await fetch("/api/services", { credentials: "include" });
-    if (!res.ok) throw new Error("Falha ao buscar dados.");
-    return res.json();
+    const res = await fetch('/api/services', { credentials: 'include' });
+    return handleResponse(res);
   },
 
   async getById(id: string): Promise<Service> {
-    const res = await fetch(`/api/services/${id}`, { credentials: "include" });
-    if (!res.ok) throw new Error("Erro ao buscar serviço.");
-    return res.json();
+    const res = await fetch(`/api/services/${id}`, { credentials: 'include' });
+    return handleResponse(res);
   },
 
   async create(payload: Partial<Service>): Promise<Service> {
@@ -18,8 +18,7 @@ export const ServiceService = {
       credentials: 'include',
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error("Erro ao criar.");
-    return res.json();
+    return handleResponse(res);
   },
 
   async update(id: string, payload: Partial<Service>): Promise<Service> {
@@ -29,8 +28,7 @@ export const ServiceService = {
       credentials: 'include',
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error("Erro ao atualizar.");
-    return res.json();
+    return handleResponse(res);
   },
 
   async delete(id: string): Promise<{ message: string }> {
@@ -38,7 +36,6 @@ export const ServiceService = {
       method: 'DELETE',
       credentials: 'include'
     });
-    if (!res.ok) throw new Error("Erro ao excluir.");
-    return res.json();
+    return handleResponse(res);
   }
 };

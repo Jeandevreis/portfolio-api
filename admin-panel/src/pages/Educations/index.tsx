@@ -9,7 +9,7 @@ import EducationCard from '@/components/EducationCard';
 export default function Educations() {
   const { t } = useTranslation();
 
-  const { educations, loading, error, deleteEducation } = useEducations({ fetchList: true });
+  const { educations, loading, globalError, deleteEducation } = useEducations({ fetchList: true });
 
   return (
     <div className="bg-gray-50 text-gray-800 min-h-screen flex flex-col">
@@ -20,10 +20,10 @@ export default function Educations() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
             <Link to="/panel" className="text-sm text-gray-500 hover:text-blue-600 mb-2 inline-flex items-center gap-1 transition-colors">
-              ← {t('educations.list.back_to_panel')}
+              ← {t('buttons.back_to_panel', { defaultValue: 'Back to panel' })}
             </Link>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-2xl">🎓</span> {t('educations.list.title')}
+              <span className="text-2xl">🎓</span> {t('educations.page.list.title', { defaultValue: 'Educations' })}
             </h1>
           </div>
 
@@ -31,14 +31,14 @@ export default function Educations() {
             to="/educations/create"
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm"
           >
-            <span>➕ {t('educations.list.new_education')}</span>
+            <span>➕ {t('educations.buttons.new_education', { defaultValue: 'New Education' })}</span>
           </Link>
         </div>
 
-        {error && (
+        {globalError && (
           <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 text-red-700 rounded-lg">
-            <p className="font-bold">{t('educations.list.error_title')}</p>
-            <p>{error}</p>
+            <p className="font-bold">{t('educations.list.error_title', { defaultValue: 'Error' })}</p>
+            <p>{globalError}</p>
           </div>
         )}
 
@@ -48,15 +48,19 @@ export default function Educations() {
           </div>
         ) : (
           <>
-            {educations.length === 0 && !error ? (
+            {educations.length === 0 && !globalError ? (
               <div className="text-center py-20 bg-white shadow-sm border border-gray-100 rounded-lg">
                 <div className="text-gray-400 text-5xl mb-4">📚</div>
-                <h3 className="text-lg font-medium text-gray-900">{t('educations.list.empty_title')}</h3>
-                <p className="text-gray-500 mt-1">{t('educations.list.empty_description')}</p>
+                <h3 className="text-lg font-medium text-gray-900">
+                  {t('educations.page.list.empty_list_title', { defaultValue: 'No educations found.' })}
+                </h3>
+                <p className="text-gray-500 mt-1">
+                  {t('educations.page.list.empty_list_description', { defaultValue: 'Start by adding your courses and degrees.' })}
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                {educations.map((education: Education) => (
+                {educations.map((education) => (
                   <EducationCard key={education.id} education={education} onDelete={deleteEducation} />
                 ))}
               </div>

@@ -1,36 +1,60 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 import { EducationService } from '@/services/educationService';
 import { UploadService } from '@/services/uploadService';
-
 import { useImagePreview } from '@/hooks/useImagePreview';
 
-const initialForm: Education = {
+import { educationSchema } from '../../../src/schemas/educations.schema';
+
+type EducationFormData = z.infer<typeof educationSchema>;
+
+const initialForm: EducationFormData = {
   type: 'college',
   status: 'completed',
   startDate: '',
   endDate: '',
-  durationHours: '',
+  durationHours: undefined as unknown as number,
   certificateUrl: '',
+  imageUrl: '',
   translations: [{ language: 'pt', institution: '', name: '', description: '' }]
 };
 
 export function useEducations(options?: { fetchList?: boolean; editId?: string }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [educations, setEducations] = useState<Education[]>([]);
-  const [form, setForm] = useState<Education>(initialForm);
+  const [loading, setLoading] = useState<boolean>(!!options?.fetchList || !!options?.editId);
+  const [globalError, setGlobalError] = useState<string | null>(null);
 
   const {
-    imagePreview, setImagePreview,
-    selectedFile, setSelectedFile,
+    imagePreview,
+    setImagePreview,
+    selectedFile,
+    setSelectedFile,
     handleFileChange
   } = useImagePreview();
 
-  const [loading, setLoading] = useState<boolean>(!!options?.fetchList || !!options?.editId);
-  const [submitting, setSubmitting] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting }
+  } = useForm<EducationFormData>({
+    resolver: zodResolver(educationSchema) as any,
+    defaultValues: initialForm
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'translations'
+  });
 
   const loadEducations = useCallback(async () => {
     setLoading(true);
@@ -38,29 +62,49 @@ export function useEducations(options?: { fetchList?: boolean; editId?: string }
       const data = await EducationService.getAll();
       setEducations(data);
     } catch (err: any) {
-      setError(err.message || "Não foi possível carregar as formações.");
+      const errorKey = err.error || err.message;
+      setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const loadEducationForEdit = useCallback(async (id: string) => {
     setLoading(true);
     try {
       const data = await EducationService.getById(id);
-      setForm({
-        ...initialForm,
-        ...data,
-        startDate: data.startDate?.split('T')[0],
-        endDate: data.endDate?.split('T')[0],
+
+      const cleanTranslations = data.translations?.length
+        ? data.translations.map((tData: any) => ({
+          language: tData.language,
+          institution: tData.institution,
+          name: tData.name,
+          description: tData.description
+        }))
+        : initialForm.translations;
+
+      reset({
+        type: (data.type as EducationFormData['type']) ?? 'college',
+        status: (data.status as EducationFormData['status']) ?? 'completed',
+        startDate: data.startDate ? data.startDate.split('T')[0] : '',
+        endDate: data.endDate ? data.endDate.split('T')[0] : '',
+
+        // 💡 Correção: Convertendo explicitamente para Number para satisfazer o TypeScript e o Zod
+        durationHours: data.durationHours ? Number(data.durationHours) : undefined,
+
+        certificateUrl: data.certificateUrl ?? '',
+        imageUrl: data.imageUrl ?? '',
+        translations: cleanTranslations,
       });
+
       setImagePreview(data.imageUrl || null);
     } catch (err: any) {
-      setError(err.message || "Erro ao carregar dados.");
+      const errorKey = err.error || err.message;
+      setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     } finally {
       setLoading(false);
     }
-  }, [setImagePreview]);
+  }, [reset, setImagePreview, t]);
 
   useEffect(() => {
     if (options?.fetchList) loadEducations();
@@ -68,90 +112,73 @@ export function useEducations(options?: { fetchList?: boolean; editId?: string }
   }, [options?.fetchList, options?.editId, loadEducations, loadEducationForEdit]);
 
   const deleteEducation = async (id: string) => {
-    if (!window.confirm("Tem certeza que deseja apagar?")) return;
+    if (!window.confirm(t('educations.list.confirm_delete', { defaultValue: 'Tem certeza que deseja apagar?' }))) return;
+
     try {
       await EducationService.delete(id);
       setEducations(prev => prev.filter(e => e.id !== id));
     } catch (err: any) {
-      alert(err.message || "Erro ao excluir.");
+      const errorKey = err.error || err.message;
+      alert(errorKey ? t(errorKey) : t('api.error.unknown'));
     }
   };
 
-
-  const getPayload = (finalImageUrl?: string) => {
-    if (!form.translations[0]?.name?.trim()) throw new Error('O nome em Português é obrigatório.');
-
-    const { id, createdAt, updatedAt, ...restOfForm } = form as any;
-
-    return {
-      ...restOfForm,
-      durationHours: form.durationHours ? Number(form.durationHours) : undefined,
-      imageUrl: finalImageUrl ?? undefined
-    };
-  };
-
-  const createEducation = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setError(null);
+  const processFormSubmit = async (data: EducationFormData, id?: string) => {
+    setGlobalError(null);
     try {
-      if (!selectedFile && !imagePreview) throw new Error('Selecione uma imagem.');
-
-      let finalImageUrl = imagePreview || undefined;
-
-      if (selectedFile) {
-        finalImageUrl = await UploadService.uploadImage(selectedFile, 'educations', `edu-${Date.now()}`);
+      if (!selectedFile && !imagePreview) {
+        throw { error: 'educations.error.image_required', message: 'Selecione uma imagem.' };
       }
 
-      await EducationService.create(getPayload(finalImageUrl));
+      let finalImageUrl = imagePreview || '';
+
+      if (selectedFile) {
+        const fileId = id || Date.now().toString();
+        finalImageUrl = await UploadService.uploadImage(selectedFile, 'educations', `edu-${fileId}`);
+      }
+
+      const payload = {
+        ...data,
+        durationHours: data.durationHours ? Number(data.durationHours) : undefined,
+        endDate: data.endDate || undefined,
+        certificateUrl: data.certificateUrl || undefined,
+        imageUrl: finalImageUrl || undefined
+      };
+
+      if (id) {
+        await EducationService.update(id, payload);
+      } else {
+        await EducationService.create(payload);
+      }
 
       setSelectedFile(null);
       navigate('/educations');
     } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
+      console.error("ERRO COMPLETO CAPTURADO NO CATCH:", err);
+      const errorKey = err.error || err.message;
+      setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     }
   };
 
-  const updateEducation = async (e: React.FormEvent<HTMLFormElement>, id: string) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setError(null);
-    try {
-      let finalImageUrl = imagePreview || undefined;
-      if (selectedFile) {
-        finalImageUrl = await UploadService.uploadImage(selectedFile, 'educations', `edu-${id}`);
-      }
-
-      await EducationService.update(id, getPayload(finalImageUrl));
-
-      setSelectedFile(null);
-      navigate('/educations');
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const updateTranslation = (index: number, field: keyof EducationTranslation, value: string) => {
-    const newTranslations = [...form.translations];
-    newTranslations[index] = { ...newTranslations[index], [field]: value };
-    setForm({ ...form, translations: newTranslations });
-  };
-
-  const addTranslation = () => {
-    setForm({ ...form, translations: [...form.translations, { language: 'en', institution: '', name: '', description: '' }] });
-  };
-
-  const removeTranslation = (index: number) => {
-    setForm({ ...form, translations: form.translations.filter((_, i) => i !== index) });
-  };
+  const createEducation = handleSubmit((data) => processFormSubmit(data));
+  const updateEducation = (id: string) => handleSubmit((data) => processFormSubmit(data, id));
 
   return {
-    educations, form, setForm, imagePreview, selectedFile, loading, submitting, error,
-    deleteEducation, createEducation, updateEducation,
-    updateTranslation, addTranslation, removeTranslation, handleFileChange
+    educations,
+    loading,
+    globalError,
+    deleteEducation,
+    createEducation,
+    updateEducation,
+
+    register,
+    errors,
+    isSubmitting,
+    fields,
+    appendTranslation: () => append({ language: 'en', institution: '', name: '', description: '' }),
+    removeTranslation: remove,
+
+    imagePreview,
+    handleFileChange
   };
 }

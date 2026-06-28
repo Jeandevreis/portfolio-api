@@ -38,6 +38,7 @@ export const getServiceById = async (c: Context) => {
 };
 
 export const createService = async (c: Context) => {
+
   try {
     const { translations, ...service } = serviceSchema.parse(await c.req.json());
 

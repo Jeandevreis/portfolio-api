@@ -1,22 +1,33 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 import { ServiceService } from '@/services/serviceService';
 import { UploadService } from '@/services/uploadService';
 
 import { useImagePreview } from '@/hooks/useImagePreview';
 
-const initialForm: Service = {
+import { z } from 'zod';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import { serviceSchema } from '../../../src/schemas/services.schema';
+
+type ServiceFormData = z.infer<typeof serviceSchema>;
+
+const initialForm: ServiceFormData = {
   link: '',
-  imageUrl: null,
+  imageUrl: '',
   translations: [{ language: 'pt', title: '', description: '' }]
 };
 
 export function useServices(options?: { fetchList?: boolean; editId?: string }) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [services, setServices] = useState<Service[]>([]);
-  const [form, setForm] = useState<Service>(initialForm);
+  const [loading, setLoading] = useState(!!options?.fetchList || !!options?.editId);
+  const [globalError, setGlobalError] = useState<string | null>(null);
 
   const {
     imagePreview,
@@ -26,39 +37,60 @@ export function useServices(options?: { fetchList?: boolean; editId?: string }) 
     handleFileChange
   } = useImagePreview();
 
-  const [loading, setLoading] = useState(!!options?.fetchList || !!options?.editId);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting }
+  } = useForm<ServiceFormData>({
+    resolver: zodResolver(serviceSchema),
+    defaultValues: initialForm
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'translations'
+  });
 
   const loadServices = useCallback(async () => {
     setLoading(true);
     try {
       const data = await ServiceService.getAll();
-      console.log("buscando serviços");
       setServices(data);
     } catch (err: any) {
-      setError(err.message || "Não foi possível carregar os serviços.");
+      setGlobalError(err.error ? t(err.error) : t('api.error.unknown'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const loadServiceForEdit = useCallback(async (id: string) => {
     setLoading(true);
     try {
       const data = await ServiceService.getById(id);
-      setForm({
+
+      const cleanTranslations = data.translations?.length
+        ? data.translations.map((t: any) => ({
+          language: t.language,
+          title: t.title,
+          description: t.description
+        }))
+        : initialForm.translations;
+
+      reset({
         link: data.link ?? '',
-        imageUrl: data.imageUrl ?? null,
-        translations: data.translations ?? initialForm.translations,
+        imageUrl: data.imageUrl ?? '',
+        translations: cleanTranslations,
       });
+
       setImagePreview(data.imageUrl || null);
     } catch (err: any) {
-      setError(err.message || "Erro ao carregar dados.");
+      setGlobalError(err.error ? t(err.error) : t('api.error.unknown'));
     } finally {
       setLoading(false);
     }
-  }, [setImagePreview]);
+  }, [reset, setImagePreview, t]);
 
   useEffect(() => {
     if (options?.fetchList) loadServices();
@@ -66,86 +98,61 @@ export function useServices(options?: { fetchList?: boolean; editId?: string }) 
   }, [options?.fetchList, options?.editId, loadServices, loadServiceForEdit]);
 
   const deleteService = async (id: string) => {
-    if (!window.confirm("Tem certeza que deseja apagar este serviço?")) return;
+    if (!window.confirm(t('services.action.confirm_delete'))) return;
     try {
       await ServiceService.delete(id);
       setServices(prev => prev.filter(s => s.id !== id));
     } catch (err: any) {
-      alert(err.message || "Erro ao excluir.");
+      alert(err.error ? t(err.error) : t('api.error.unknown'));
     }
   };
 
-  const getPayload = (finalImageUrl?: string) => {
-    if (!form.translations[0]?.title?.trim()) throw new Error('O título em Português é obrigatório.');
-
-    return {
-      link: form.link,
-      translations: form.translations,
-      imageUrl: finalImageUrl ?? undefined,
-    };
-  };
-
-  const createService = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setError(null);
+  const processFormSubmit = async (data: ServiceFormData, id?: string) => {
+    setGlobalError(null);
+    console.log(data);
     try {
-      let finalImageUrl = imagePreview || undefined;
+      let finalImageUrl = imagePreview || '';
 
       if (selectedFile) {
-        finalImageUrl = await UploadService.uploadImage(selectedFile, 'services', `srv-${Date.now()}`);
+        const fileId = id || Date.now().toString();
+        finalImageUrl = await UploadService.uploadImage(selectedFile, 'services', `srv-${fileId}`);
       }
 
-      await ServiceService.create(getPayload(finalImageUrl));
+      const payload = { ...data, imageUrl: finalImageUrl };
+
+      if (id) {
+        await ServiceService.update(id, payload);
+      } else {
+        await ServiceService.create(payload);
+      }
 
       setSelectedFile(null);
       navigate('/services');
     } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
+      const errorKey = err.error;
+      setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     }
   };
 
-  const updateService = async (e: React.FormEvent<HTMLFormElement>, id: string) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setError(null);
-    try {
-      let finalImageUrl = imagePreview || undefined;
-
-      if (selectedFile) {
-        finalImageUrl = await UploadService.uploadImage(selectedFile, 'services', `srv-${id}`);
-      }
-
-      await ServiceService.update(id, getPayload(finalImageUrl));
-
-      setSelectedFile(null);
-      navigate('/services');
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const updateTranslation = (index: number, field: keyof ServiceTranslation, value: string) => {
-    const newTranslations = [...form.translations];
-    newTranslations[index] = { ...newTranslations[index], [field]: value };
-    setForm({ ...form, translations: newTranslations });
-  };
-
-  const addTranslation = () => {
-    setForm({ ...form, translations: [...form.translations, { language: 'en', title: '', description: '' }] });
-  };
-
-  const removeTranslation = (index: number) => {
-    setForm({ ...form, translations: form.translations.filter((_, i) => i !== index) });
-  };
+  const createService = handleSubmit((data) => processFormSubmit(data));
+  const updateService = (id: string) => handleSubmit((data) => processFormSubmit(data, id));
 
   return {
-    services, form, setForm, imagePreview, selectedFile, loading, submitting, error,
-    deleteService, createService, updateService,
-    updateTranslation, addTranslation, removeTranslation, handleFileChange
+    services,
+    loading,
+    globalError,
+    deleteService,
+    createService,
+    updateService,
+
+    register,
+    errors,
+    isSubmitting,
+    fields,
+    appendTranslation: () => append({ language: 'en', title: '', description: '' }),
+    removeTranslation: remove,
+
+    imagePreview,
+    handleFileChange
   };
 }

@@ -12,7 +12,7 @@ export default function Services() {
   const {
     services,
     loading,
-    error,
+    globalError,
     deleteService,
   } = useServices({ fetchList: true });
 
@@ -24,26 +24,30 @@ export default function Services() {
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
+
             <Link to="/panel" className="text-sm text-gray-500 hover:text-blue-600 mb-2 inline-flex items-center gap-1 transition-colors">
-              ← {t('services.list.back_to_panel', { defaultValue: 'Voltar ao painel' })}
+              ← {t('buttons.back_to_panel', { defaultValue: 'Back to panel' })}
             </Link>
+
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <span className="text-2xl">🛠️</span> {t('services.list.title', { defaultValue: 'Serviços' })}
+              <span className="text-2xl">🛠️</span> {t('services.page.list.title', { defaultValue: 'Services' })}
             </h1>
+
           </div>
 
           <Link
             to="/services/create"
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm"
           >
-            <span>➕ {t('services.list.new_service', { defaultValue: 'Novo Serviço' })}</span>
+            <span>➕ {t('services.buttons.new_service', { defaultValue: 'New service' })}</span>
           </Link>
+
         </div>
 
-        {error && (
+        {globalError && (
           <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 text-red-700 rounded-lg">
-            <p className="font-bold">{t('services.list.error_title', { defaultValue: 'Erro' })}</p>
-            <p>{error}</p>
+            <p className="font-bold">{t('services.list.error_title', { defaultValue: 'Error' })}</p>
+            <p>{globalError}</p>
           </div>
         )}
 
@@ -53,11 +57,18 @@ export default function Services() {
           </div>
         ) : (
           <>
-            {services.length === 0 && !error ? (
+            {services.length === 0 && !globalError ? (
               <div className="text-center py-20 bg-white shadow-sm border border-gray-100 rounded-lg">
                 <div className="text-gray-400 text-5xl mb-4">📁</div>
-                <h3 className="text-lg font-medium text-gray-900">{t('services.list.empty_title', { defaultValue: 'Nenhum serviço encontrado' })}</h3>
-                <p className="text-gray-500 mt-1">{t('services.list.empty_description', { defaultValue: 'Cadastre seu primeiro serviço para vê-lo aqui.' })}</p>
+
+                <h3 className="text-lg font-medium text-gray-900">
+                  {t('services.page.list.empty_list_title', { defaultValue: 'No services found.' })}
+                </h3>
+
+                <p className="text-gray-500 mt-1">
+                  {t('services.page.list.empty_list_description', { defaultValue: 'Register your first service to see it here.' })}
+                </p>
+
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">

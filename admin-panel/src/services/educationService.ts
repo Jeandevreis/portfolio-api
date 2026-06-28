@@ -1,14 +1,14 @@
+import { handleResponse } from '@/helpers/fetchHelpers';
+
 export const EducationService = {
   async getAll(): Promise<Education[]> {
     const res = await fetch("/api/educations", { credentials: "include" });
-    if (!res.ok) throw new Error("Falha ao buscar dados.");
-    return res.json();
+    return handleResponse(res);
   },
 
   async getById(id: string): Promise<Education> {
     const res = await fetch(`/api/educations/${id}`, { credentials: "include" });
-    if (!res.ok) throw new Error("Erro ao buscar formação.");
-    return res.json();
+    return handleResponse(res);
   },
 
   async create(payload: Partial<Education>): Promise<Education> {
@@ -18,8 +18,7 @@ export const EducationService = {
       credentials: 'include',
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error("Erro ao criar.");
-    return res.json();
+    return handleResponse(res);
   },
 
   async update(id: string, payload: Partial<Education>): Promise<Education> {
@@ -29,8 +28,7 @@ export const EducationService = {
       credentials: 'include',
       body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error("Erro ao atualizar.");
-    return res.json();
+    return handleResponse(res);
   },
 
   async delete(id: string): Promise<{ message: string }> {
@@ -38,7 +36,6 @@ export const EducationService = {
       method: 'DELETE',
       credentials: 'include'
     });
-    if (!res.ok) throw new Error("Erro ao excluir.");
-    return res.json();
+    return handleResponse(res);
   }
 };

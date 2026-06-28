@@ -22,13 +22,13 @@ export default function ProjectCard({ project, onDelete }: ProjectCardProps) {
         {project.imageUrl ? (
           <img
             src={project.imageUrl}
-            alt={t('projects.card.image_alt')}
+            alt={t('projects.cards.image_alt')}
             className="w-full h-full object-contain block group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
           <div className="flex flex-col items-center justify-center w-full h-full text-gray-400">
             <span className="text-3xl mb-2">🖼️</span>
-            <span className="text-sm">{t('projects.card.no_image')}</span>
+            <span className="text-sm">{t('projects.cards.no_image')}</span>
           </div>
         )}
 
@@ -50,21 +50,17 @@ export default function ProjectCard({ project, onDelete }: ProjectCardProps) {
       </h3>
 
       <div className="grid grid-cols-2 gap-3 mt-auto">
-        {project.liveUrl ? (
+        {project.liveUrl && (
           <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors rounded-lg">
-            🌐 {t('projects.card.live')}
+            🌐 {t('projects.cards.live_url')}
           </a>
-        ) : (
-          <span className="flex items-center justify-center px-3 py-2 text-xs font-medium text-gray-400 bg-gray-100 cursor-not-allowed rounded-lg">
-            {t('projects.card.offline')}
-          </span>
         )}
 
         {project.repoUrl && (
           <a href={project.repoUrl} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors rounded-lg">
-            📦 {t('projects.card.repo')}
+            📦 {t('projects.cards.repo_url')}
           </a>
         )}
       </div>

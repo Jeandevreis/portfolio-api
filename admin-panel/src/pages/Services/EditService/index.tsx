@@ -8,12 +8,20 @@ import ServiceForm from '@/components/ServiceForm';
 
 export default function EditService() {
   const { t } = useTranslation();
-
   const { id } = useParams<{ id: string }>();
+
   const {
-    form, setForm, imagePreview, submitting, error, loading,
-    handleFileChange, updateTranslation, addTranslation, removeTranslation,
-    updateService
+    loading,
+    globalError,
+    updateService,
+    register,
+    errors,
+    isSubmitting,
+    fields,
+    appendTranslation,
+    removeTranslation,
+    imagePreview,
+    handleFileChange
   } = useServices({ editId: id });
 
   return (
@@ -28,26 +36,30 @@ export default function EditService() {
         <main className="flex-1 px-8 py-8 w-full">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{t('services.edit.title', { defaultValue: 'Editar Serviço' })}</h1>
-              <p className="text-sm text-gray-500">{t('services.edit.description', { defaultValue: 'Atualize as informações do serviço selecionado.' })}</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {t('services.page.edit.title', { defaultValue: 'Edit Service' })}
+              </h1>
+              <p className="text-sm text-gray-500">
+                {t('services.page.edit.description', { defaultValue: 'Update the information for the selected service.' })}
+              </p>
             </div>
             <Link to="/services" className="text-sm text-gray-600 hover:text-blue-600 font-medium flex items-center gap-1 transition-colors">
-              ← {t('services.edit.back', { defaultValue: 'Voltar' })}
+              ← {t('services.buttons.back_to_services', { defaultValue: 'Back to services' })}
             </Link>
           </div>
 
           <ServiceForm
-            form={form}
-            setForm={setForm}
-            imagePreview={imagePreview}
-            submitting={submitting}
-            error={error}
-            handleFileChange={handleFileChange}
-            updateTranslation={updateTranslation}
-            addTranslation={addTranslation}
+            register={register}
+            errors={errors}
+            fields={fields}
+            appendTranslation={appendTranslation}
             removeTranslation={removeTranslation}
-            onSubmitAction={(e) => updateService(e, id as string)}
-            submitButtonText={t('services.form.buttons.save', { defaultValue: 'Salvar Alterações' })}
+            imagePreview={imagePreview}
+            isSubmitting={isSubmitting}
+            globalError={globalError}
+            handleFileChange={handleFileChange}
+            onSubmitAction={updateService(id as string)}
+            submitButtonText={t('services.buttons.save_service', { defaultValue: 'Save Service' })}
           />
         </main>
       )}

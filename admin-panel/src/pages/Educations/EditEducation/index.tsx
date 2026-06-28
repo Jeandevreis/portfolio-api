@@ -10,10 +10,19 @@ export default function EditEducation() {
   const { t } = useTranslation();
 
   const { id } = useParams<{ id: string }>();
+
   const {
-    form, setForm, imagePreview, submitting, error, loading,
-    handleFileChange, updateTranslation, addTranslation, removeTranslation,
-    updateEducation
+    loading,
+    globalError,
+    updateEducation,
+    register,
+    errors,
+    isSubmitting,
+    fields,
+    appendTranslation,
+    removeTranslation,
+    imagePreview,
+    handleFileChange
   } = useEducations({ editId: id });
 
   return (
@@ -28,25 +37,30 @@ export default function EditEducation() {
         <div className="flex-1 px-8 py-8 w-full">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{t('educations.edit.title')}</h1>
-              <p className="text-sm text-gray-500">{t('educations.edit.description')}</p>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {t('educations.page.edit.title', { defaultValue: 'Edit Education' })}
+              </h1>
+              <p className="text-sm text-gray-500">
+                {t('educations.page.edit.description', { defaultValue: 'Update your course or degree information.' })}
+              </p>
             </div>
             <Link to="/educations" className="text-sm text-gray-600 hover:text-blue-600 font-medium flex items-center gap-1 transition-colors">
-              {t('educations.edit.back')}
+              ← {t('educations.buttons.back_to_educations', { defaultValue: 'Back to educations' })}
             </Link>
           </div>
 
           <EducationForm
-            form={form}
-            setForm={setForm}
-            imagePreview={imagePreview}
-            submitting={submitting}
-            error={error}
-            handleFileChange={handleFileChange}
-            updateTranslation={updateTranslation}
-            addTranslation={addTranslation}
+            register={register}
+            errors={errors}
+            fields={fields}
+            appendTranslation={appendTranslation}
             removeTranslation={removeTranslation}
-            onSubmitAction={(e) => updateEducation(e, id as string)}
+            imagePreview={imagePreview}
+            isSubmitting={isSubmitting}
+            globalError={globalError}
+            handleFileChange={handleFileChange}
+            onSubmitAction={updateEducation(id as string)}
+            submitButtonText={t('educations.buttons.save_education', { defaultValue: 'Save Education' })}
           />
         </div>
       )}
