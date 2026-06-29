@@ -77,7 +77,7 @@ describe('Education Zod Schema', () => {
 
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('education.error.image_url')
+      expect(result.error.issues[0].message).toBe('educations.error.image_url')
     }
   })
 
@@ -109,13 +109,13 @@ describe('Education Zod Schema', () => {
   })
 
   it('should fail if type enum is invalid', () => {
-    const invalidTypePayload = { ...validPayload, type: 'bootcamp' }
+    const invalidTypePayload = { ...validPayload, type: 'invalid-type' }
 
     const result = educationSchema.safeParse(invalidTypePayload)
 
     expect(result.success).toBe(false)
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('education.error.type')
+      expect(result.error.issues[0].message).toBe('educations.error.type')
     }
   })
 })

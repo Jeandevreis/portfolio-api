@@ -16,6 +16,30 @@
     "delete": "Excluir",
     "add": "Adicionar"
   },
+  "login": {
+    "titles": {
+      "admin_access": "Acesso Admin",
+      "panel_subtitle": "Painel do Portfólio",
+      "sign_in": "Entrar",
+      "credentials_subtitle": "Insira suas credenciais"
+    },
+    "labels": {
+      "email": "E-mail",
+      "password": "Senha"
+    },
+    "placeholders": {
+      "email": "admin@example.com",
+      "password": "••••••••"
+    },
+    "buttons": {
+      "signing_in": "Entrando...",
+      "access_panel": "Acessar Painel"
+    },
+    "error": {
+      "email": "E-mail inválido",
+      "password": "A senha deve ter pelo menos 6 caracteres"
+    }
+  },
   "projects": {
     "page": {
       "list": {
@@ -199,6 +223,32 @@
   "panel_card": {
     "soon": "Em breve",
     "access": "Acessar"
+  },
+  "panel": {
+    "title": "Bem-vindo de volta!",
+    "description": "O que você gostaria de gerenciar hoje?",
+    "cards": {
+      "projects": {
+        "title": "MeusProjetos",
+        "description": "Gerenciar, editar e adicionar novos projetos ao portfólio."
+      },
+      "educations": {
+        "title": "Minhas Formações",
+        "description": "Gerenciar, editar e adicionar novas formações ao portfólio."
+      },
+      "services": {
+        "title": "Meus Serviços",
+        "description": "Gerenciar, editar e adicionar novos serviços ao portfólio."
+      },
+      "config": {
+        "title": "Configurações",
+        "description": "Alterar as configurações do portfólio."
+      },
+      "public_website": {
+        "title": "Visitar Site",
+        "description": "Acessar o site público do portfólio."
+      }
+    }
   },
   "languages": {
     "pt": "🇧🇷 Português",

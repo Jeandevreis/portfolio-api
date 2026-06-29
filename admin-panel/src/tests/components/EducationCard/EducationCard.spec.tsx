@@ -65,7 +65,7 @@ describe('EducationCard Component', () => {
     expect(screen.getByText('Feb 2023')).toBeInTheDocument();
     expect(screen.getByRole('img')).toHaveAttribute('src', mockEducation.imageUrl);
 
-    expect(screen.getByRole('link', { name: 'educations.card.certificate' })).toHaveAttribute('href', mockEducation.certificateUrl);
+    expect(screen.getByRole('link', { name: 'Certificate URL' })).toHaveAttribute('href', mockEducation.certificateUrl);
   });
 
   it('should render fallbacks when image and certificate are missing', () => {

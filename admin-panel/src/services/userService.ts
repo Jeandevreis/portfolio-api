@@ -1,3 +1,5 @@
+import { handleResponse } from "@/helpers/fetchHelpers";
+
 export const UserService = {
   async updateProfile(payload: Partial<User>): Promise<User> {
     const res = await fetch('/api/user/profile', {
@@ -7,13 +9,7 @@ export const UserService = {
       body: JSON.stringify(payload)
     });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || 'Erro ao atualizar perfil.');
-    }
-
-    return data;
+    return handleResponse(res);
   },
 
   async updatePassword(payload: Pick<PasswordForm, 'oldPassword' | 'newPassword'>): Promise<User> {
@@ -24,12 +20,6 @@ export const UserService = {
       body: JSON.stringify(payload)
     });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || 'Erro ao alterar a senha.');
-    }
-
-    return data;
+    return handleResponse(res);
   }
 };

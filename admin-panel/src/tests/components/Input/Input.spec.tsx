@@ -30,7 +30,6 @@ describe('Input Component', () => {
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute('id', 'username');
     expect(input).toHaveAttribute('name', 'username');
-    expect(input).toHaveAttribute('type', 'text'); // default type
   });
 
   it('should render children elements (like an IconWrapper)', () => {

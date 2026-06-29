@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { AuthService } from '@/services/authService';
 
 interface User {
   id: string;
@@ -26,17 +27,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch('/auth/me', { credentials: 'include' });
-        const isJson = res.headers.get('content-type')?.includes('application/json');
-
-        if (res.ok && isJson) {
-          const userData = await res.json();
-          setUser(userData);
-          setIsAuthenticated(true);
-        } else {
-          setUser(null);
-          setIsAuthenticated(false);
-        }
+        const userData = await AuthService.me();
+        setUser(userData);
+        setIsAuthenticated(true);
       } catch (_) {
         setUser(null);
         setIsAuthenticated(false);
@@ -49,33 +42,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch('/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ email, password }),
-    });
+    await AuthService.login({ email, password });
 
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      throw new Error(data.message || 'Email ou senha incorretos.');
-    }
-
-    window.location.href = '/panel';
+    const userData = await AuthService.me();
+    setUser(userData);
+    setIsAuthenticated(true);
   };
 
   const logout = async () => {
-    const response = await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
-
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({}));
-      alert(data.message || 'Erro ao fazer logout. Tente novamente.');
-      return;
-    }
-
+    await AuthService.logout();
     setUser(null);
     setIsAuthenticated(false);
-  }
+  };
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, checkingAuth, user, setUser, login, logout }}>

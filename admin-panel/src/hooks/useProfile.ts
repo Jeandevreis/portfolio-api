@@ -1,19 +1,32 @@
 import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '@/contexts/AuthContext';
-
 import { UploadService } from '@/services/uploadService';
 import { UserService } from '@/services/userService';
-
 import { useImagePreview } from '@/hooks/useImagePreview';
+
+import { updateProfileSchema, changePasswordSchema } from '../../../src/schemas/users.schema';
+
+
+const passwordFormSchema = changePasswordSchema
+  .extend({
+    confirmPassword: z.string().min(6, { error: 'users.error.new_password' }),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: 'profile.error.password_mismatch',
+    path: ['confirmPassword'],
+  });
+
+type ProfileFormData = z.infer<typeof updateProfileSchema>;
+type PasswordFormData = z.infer<typeof passwordFormSchema>;
 
 export function useProfile() {
   const { user, setUser } = useAuth();
-
-  const [profileForm, setProfileForm] = useState<ProfileForm>({ name: '', email: '' });
-  const [passwordForm, setPasswordForm] = useState<PasswordForm>({
-    oldPassword: '', newPassword: '', confirmPassword: ''
-  });
+  const { t } = useTranslation();
 
   const {
     imagePreview, setImagePreview,
@@ -22,28 +35,35 @@ export function useProfile() {
   } = useImagePreview();
 
   const [loading, setLoading] = useState<boolean>(true);
-  const [submittingProfile, setSubmittingProfile] = useState<boolean>(false);
-  const [submittingPassword, setSubmittingPassword] = useState<boolean>(false);
-  const [errorProfile, setErrorProfile] = useState<string | null>(null);
-  const [errorPassword, setErrorPassword] = useState<string | null>(null);
+
+  const [globalErrorProfile, setGlobalErrorProfile] = useState<string | null>(null);
+  const [globalErrorPassword, setGlobalErrorPassword] = useState<string | null>(null);
   const [successProfile, setSuccessProfile] = useState<boolean>(false);
   const [successPassword, setSuccessPassword] = useState<boolean>(false);
 
+  const profileForm = useForm<ProfileFormData>({
+    resolver: zodResolver(updateProfileSchema as any),
+    defaultValues: { name: '', email: '' }
+  });
+
+  const passwordForm = useForm<PasswordFormData>({
+    resolver: zodResolver(passwordFormSchema as any),
+    defaultValues: { oldPassword: '', newPassword: '', confirmPassword: '' }
+  });
+
   useEffect(() => {
     if (user) {
-      setProfileForm({
+      profileForm.reset({
         name: user.name || '',
         email: user.email || '',
       });
       setImagePreview(user.avatarUrl || null);
       setLoading(false);
     }
-  }, [user, setImagePreview]);
+  }, [user, profileForm, setImagePreview]);
 
-  const updateProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmittingProfile(true);
-    setErrorProfile(null);
+  const processProfileSubmit = async (data: ProfileFormData) => {
+    setGlobalErrorProfile(null);
     setSuccessProfile(false);
 
     try {
@@ -53,56 +73,57 @@ export function useProfile() {
         finalAvatarUrl = await UploadService.uploadImage(selectedFile, 'users', `avatar-${user?.id}`);
       }
 
-      const updatedUser = await UserService.updateProfile({
-        name: profileForm.name,
-        email: profileForm.email,
-        avatarUrl: finalAvatarUrl
-      });
+      const payload = {
+        ...data,
+        avatarUrl: finalAvatarUrl || undefined
+      };
+
+      const updatedUser = await UserService.updateProfile(payload);
 
       setUser(updatedUser);
       setSuccessProfile(true);
       setSelectedFile(null);
     } catch (err: any) {
-      setErrorProfile(err.message);
-    } finally {
-      setSubmittingProfile(false);
+      const errorKey = err.error || err.message;
+      setGlobalErrorProfile(errorKey ? t(errorKey) : t('api.error.unknown'));
     }
   };
 
-  const updatePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSubmittingPassword(true);
-    setErrorPassword(null);
+  const processPasswordSubmit = async (data: PasswordFormData) => {
+    setGlobalErrorPassword(null);
     setSuccessPassword(false);
-
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setErrorPassword('A nova senha e a confirmação não coincidem.');
-      setSubmittingPassword(false);
-      return;
-    }
 
     try {
       await UserService.updatePassword({
-        oldPassword: passwordForm.oldPassword,
-        newPassword: passwordForm.newPassword,
+        oldPassword: data.oldPassword,
+        newPassword: data.newPassword,
       });
 
       setSuccessPassword(true);
-      setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+      passwordForm.reset();
     } catch (err: any) {
-      setErrorPassword(err.message);
-    } finally {
-      setSubmittingPassword(false);
+      const errorKey = err.error || err.message;
+      setGlobalErrorPassword(errorKey ? t(errorKey) : t('api.error.unknown'));
     }
   };
 
   return {
-    profileForm, setProfileForm,
-    passwordForm, setPasswordForm,
-    imagePreview, handleFileChange,
-    loading, submittingProfile, submittingPassword,
-    errorProfile, errorPassword,
-    successProfile, successPassword,
-    updateProfileSubmit, updatePasswordSubmit
+    profileRegister: profileForm.register,
+    profileErrors: profileForm.formState.errors,
+    isSubmittingProfile: profileForm.formState.isSubmitting,
+    updateProfileSubmit: profileForm.handleSubmit(processProfileSubmit),
+    globalErrorProfile,
+    successProfile,
+
+    passwordRegister: passwordForm.register,
+    passwordErrors: passwordForm.formState.errors,
+    isSubmittingPassword: passwordForm.formState.isSubmitting,
+    updatePasswordSubmit: passwordForm.handleSubmit(processPasswordSubmit),
+    globalErrorPassword,
+    successPassword,
+
+    imagePreview,
+    handleFileChange,
+    loading,
   };
 }

@@ -9,14 +9,15 @@ import ImageSelector from '@/components/ImageSelector';
 
 export default function Profile() {
   const { t } = useTranslation();
+
   const {
-    profileForm, setProfileForm,
-    passwordForm, setPasswordForm,
-    imagePreview, handleFileChange,
-    loading, submittingProfile, submittingPassword,
-    errorProfile, errorPassword,
-    successProfile, successPassword,
-    updateProfileSubmit, updatePasswordSubmit
+    // Profile Form Hooks
+    profileRegister, profileErrors, isSubmittingProfile, updateProfileSubmit, globalErrorProfile, successProfile,
+
+    // Password Form Hooks
+    passwordRegister, passwordErrors, isSubmittingPassword, updatePasswordSubmit, globalErrorPassword, successPassword,
+
+    imagePreview, handleFileChange, loading
   } = useProfile();
 
   return (
@@ -52,50 +53,53 @@ export default function Profile() {
                 </div>
 
                 <div className="md:col-span-2 space-y-4">
-                  <Input
-                    id="name"
-                    name="name"
-                    label={t('profile.labels.name', { defaultValue: 'Nome Completo' })}
-                    type="text"
-                    value={profileForm.name}
-                    onChange={e => setProfileForm({ ...profileForm, name: e.target.value })}
-                    placeholder={t('profile.placeholders.name', { defaultValue: 'Seu nome completo' })}
-                    required
-                  >
-                    <IconWrapper>📝</IconWrapper>
-                  </Input>
+                  <div>
+                    <Input
+                      id="name"
+                      label={t('profile.labels.name', { defaultValue: 'Nome Completo' })}
+                      type="text"
+                      placeholder={t('profile.placeholders.name', { defaultValue: 'Seu nome completo' })}
+                      {...profileRegister('name')}
+                    >
+                      <IconWrapper>📝</IconWrapper>
+                    </Input>
+                    {profileErrors.name?.message && (
+                      <span className="text-red-500 text-xs">{t(profileErrors.name.message as string)}</span>
+                    )}
+                  </div>
 
-                  <Input
-                    id="email"
-                    name="email"
-                    label={t('profile.labels.email', { defaultValue: 'E-mail de Acesso' })}
-                    type="email"
-                    value={profileForm.email}
-                    onChange={e => setProfileForm({ ...profileForm, email: e.target.value })}
-                    placeholder={t('profile.placeholders.email', { defaultValue: 'seu.email@exemplo.com' })}
-                    required
-                  >
-                    <IconWrapper>📧</IconWrapper>
-                  </Input>
+                  <div>
+                    <Input
+                      id="email"
+                      label={t('profile.labels.email', { defaultValue: 'E-mail de Acesso' })}
+                      type="email"
+                      placeholder={t('profile.placeholders.email', { defaultValue: 'seu.email@exemplo.com' })}
+                      {...profileRegister('email')}
+                    >
+                      <IconWrapper>📧</IconWrapper>
+                    </Input>
+                    {profileErrors.email?.message && (
+                      <span className="text-red-500 text-xs">{t(profileErrors.email.message as string)}</span>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {errorProfile && <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded text-red-700 text-sm">{errorProfile}</div>}
+              {globalErrorProfile && <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded text-red-700 text-sm">{globalErrorProfile}</div>}
               {successProfile && <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded text-green-700 text-sm">{t('profile.messages.profile_success', { defaultValue: 'Perfil atualizado com sucesso!' })}</div>}
             </div>
 
             <div className="bg-gray-50 px-6 py-4 flex items-center justify-end border-t border-gray-200">
               <button
                 type="submit"
-                disabled={submittingProfile}
+                disabled={isSubmittingProfile}
                 className="cursor-pointer inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all"
               >
-                {submittingProfile ? t('profile.buttons.saving', { defaultValue: 'Salvando...' }) : t('profile.buttons.save_profile', { defaultValue: 'Salvar Perfil' })}
+                {isSubmittingProfile ? t('profile.buttons.saving', { defaultValue: 'Salvando...' }) : t('profile.buttons.save_profile', { defaultValue: 'Salvar Perfil' })}
               </button>
             </div>
           </form>
 
-          {/* CARD 2: ALTERAR SENHA */}
           <form onSubmit={updatePasswordSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="p-6 md:p-8 space-y-6">
               <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3">
@@ -103,57 +107,63 @@ export default function Profile() {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Input
-                  id="oldPassword"
-                  name="oldPassword"
-                  label={t('profile.labels.old_password', { defaultValue: 'Senha Atual' })}
-                  type="password"
-                  value={passwordForm.oldPassword}
-                  onChange={e => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
-                  placeholder="••••••••"
-                  required
-                >
-                  <IconWrapper>🔑</IconWrapper>
-                </Input>
+                <div>
+                  <Input
+                    id="oldPassword"
+                    label={t('profile.labels.old_password', { defaultValue: 'Senha Atual' })}
+                    type="password"
+                    placeholder="••••••••"
+                    {...passwordRegister('oldPassword')}
+                  >
+                    <IconWrapper>🔑</IconWrapper>
+                  </Input>
+                  {passwordErrors.oldPassword?.message && (
+                    <span className="text-red-500 text-xs">{t(passwordErrors.oldPassword.message as string)}</span>
+                  )}
+                </div>
 
-                <Input
-                  id="newPassword"
-                  name="newPassword"
-                  label={t('profile.labels.new_password', { defaultValue: 'Nova Senha' })}
-                  type="password"
-                  value={passwordForm.newPassword}
-                  onChange={e => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                  placeholder="••••••••"
-                  required
-                >
-                  <IconWrapper>✨</IconWrapper>
-                </Input>
+                <div>
+                  <Input
+                    id="newPassword"
+                    label={t('profile.labels.new_password', { defaultValue: 'Nova Senha' })}
+                    type="password"
+                    placeholder="••••••••"
+                    {...passwordRegister('newPassword')}
+                  >
+                    <IconWrapper>✨</IconWrapper>
+                  </Input>
+                  {passwordErrors.newPassword?.message && (
+                    <span className="text-red-500 text-xs">{t(passwordErrors.newPassword.message as string)}</span>
+                  )}
+                </div>
 
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  label={t('profile.labels.confirm_password', { defaultValue: 'Confirmar Nova Senha' })}
-                  type="password"
-                  value={passwordForm.confirmPassword}
-                  onChange={e => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                  placeholder="••••••••"
-                  required
-                >
-                  <IconWrapper>✅</IconWrapper>
-                </Input>
+                <div>
+                  <Input
+                    id="confirmPassword"
+                    label={t('profile.labels.confirm_password', { defaultValue: 'Confirmar Nova Senha' })}
+                    type="password"
+                    placeholder="••••••••"
+                    {...passwordRegister('confirmPassword')}
+                  >
+                    <IconWrapper>✅</IconWrapper>
+                  </Input>
+                  {passwordErrors.confirmPassword?.message && (
+                    <span className="text-red-500 text-xs">{t(passwordErrors.confirmPassword.message as string)}</span>
+                  )}
+                </div>
               </div>
 
-              {errorPassword && <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded text-red-700 text-sm">{errorPassword}</div>}
+              {globalErrorPassword && <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded text-red-700 text-sm">{globalErrorPassword}</div>}
               {successPassword && <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded text-green-700 text-sm">{t('profile.messages.password_success', { defaultValue: 'Senha alterada com sucesso!' })}</div>}
             </div>
 
             <div className="bg-gray-50 px-6 py-4 flex items-center justify-end border-t border-gray-200">
               <button
                 type="submit"
-                disabled={submittingPassword}
+                disabled={isSubmittingPassword}
                 className="cursor-pointer inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all"
               >
-                {submittingPassword ? t('profile.buttons.updating', { defaultValue: 'Alterando...' }) : t('profile.buttons.update_password', { defaultValue: 'Atualizar Senha' })}
+                {isSubmittingPassword ? t('profile.buttons.updating', { defaultValue: 'Alterando...' }) : t('profile.buttons.update_password', { defaultValue: 'Atualizar Senha' })}
               </button>
             </div>
           </form>
