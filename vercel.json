@@ -1,21 +1,7 @@
 {
-  "routes": [
-    {
-      "src": "^/$",
-      "dest": "/index.html"
-    }
-  ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    },
-    {
-      "source": "/auth/(.*)",
-      "destination": "/auth/$1"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/((?!api|auth).*)",
       "destination": "/index.html"
     }
   ]
