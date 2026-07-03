@@ -2,8 +2,8 @@
 
 A full-stack application living in a single repository, split into two main layers: a fast **Hono** API and a **React + Vite Admin Panel**. The frontend is a subproject of the backend (`/admin-panel`). In development, Vite proxies requests to the API; in production, the panel is built and its static files are served directly by Hono from a `public` folder.
 
-[![CI Tests](https://github.com/SEU_USUARIO/SEU_REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/SEU_USUARIO/SEU_REPO/actions/workflows/ci.yml)
-[![Codecov](https://codecov.io/gh/SEU_USUARIO/SEU_REPO/graph/badge.svg)](https://codecov.io/gh/SEU_USUARIO/SEU_REPO)
+[![CI Tests](https://github.com/WillianDDaniel/portfolio-api/actions/workflows/ci.yml/badge.svg)](https://github.com/WillianDDaniel/portfolio-api/actions/workflows/ci.yml)
+[![Codecov](https://codecov.io/gh/WillianDDaniel/portfolio-api/graph/badge.svg)](https://codecov.io/gh/WillianDDaniel/portfolio-api)
 
 > 🖥️ **Frontend docs:** the Admin Panel has its own README with UI-specific details → [`admin-panel/README.md`](./admin-panel/README.md)
 
