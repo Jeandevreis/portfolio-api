@@ -124,4 +124,78 @@ describe('ProjectForm', () => {
     expect(mockProps.removeTranslation).toHaveBeenCalledTimes(1);
     expect(mockProps.removeTranslation).toHaveBeenCalledWith(1);
   });
+
+  it('should render field errors when provided', () => {
+    const mockErrors = {
+      liveUrl: { message: 'errors.invalid_url', type: 'pattern' },
+      repoUrl: { message: 'errors.invalid_url', type: 'pattern' }
+    };
+
+    render(<ProjectForm {...mockProps} errors={mockErrors as any} />);
+
+    const errorMessages = screen.getAllByText('errors.invalid_url');
+    expect(errorMessages).toHaveLength(2);
+  });
+
+  it('should render translation field errors correctly', () => {
+    const mockErrorsWithTranslations = {
+      translations: [
+        { title: { message: 'errors.required', type: 'required' } }
+      ]
+    };
+
+    render(<ProjectForm {...mockProps} errors={mockErrorsWithTranslations as any} />);
+
+    expect(screen.getByText('errors.required')).toBeInTheDocument();
+  });
+
+  it('should NOT render delete button for the first translation (index 0)', () => {
+    render(<ProjectForm {...mockProps} fields={[mockFields[0]] as any} />);
+
+    expect(screen.queryByTitle('Delete')).not.toBeInTheDocument();
+  });
+
+  it('should NOT render globalError div when it is null', () => {
+    render(<ProjectForm {...mockProps} globalError={null} />);
+
+    const errorDiv = document.querySelector('.bg-red-50');
+    expect(errorDiv).not.toBeInTheDocument();
+  });
+
+  it('should render the default submit text when not submitting', () => {
+    render(<ProjectForm {...mockProps} isSubmitting={false} />);
+
+    expect(screen.getByText('projects.form.buttons.save_project')).toBeInTheDocument();
+    expect(screen.queryByText('Saving...')).not.toBeInTheDocument();
+  });
+
+  it('should apply default border classes when there is no description error', () => {
+    render(<ProjectForm {...mockProps} errors={{}} />);
+
+    const textarea = screen.getByPlaceholderText(/Describe the technologies/i);
+    expect(textarea.className).toContain('border-zinc-200');
+    expect(textarea.className).not.toContain('border-red-500');
+  });
+
+  it('should NOT render error messages when there are no errors in translations', () => {
+    render(<ProjectForm {...mockProps} errors={{}} />);
+
+    const errorMessages = screen.queryByText('errors.required'); // ou o texto que você usa
+    expect(errorMessages).not.toBeInTheDocument();
+  });
+
+  it('should render error messages only for the specific translation field that has an error', () => {
+    const mockErrors = {
+      translations: [
+        { title: { message: 'errors.title_required', type: 'required' } }
+      ]
+    };
+
+    render(<ProjectForm {...mockProps} errors={mockErrors as any} />);
+
+    expect(screen.getByText('errors.title_required')).toBeInTheDocument();
+
+    expect(screen.queryByText('errors.language_required')).not.toBeInTheDocument();
+    expect(screen.queryByText('errors.description_required')).not.toBeInTheDocument();
+  });
 });

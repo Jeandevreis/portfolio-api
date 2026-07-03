@@ -24,7 +24,7 @@ export const educationSchema = z.object({
     .nullable(),
 
 
-  imageUrl: z.url({ error: 'education.error.image_url' })
+  imageUrl: z.url({ error: 'educations.error.image_url' })
     .startsWith('http', { message: 'educations.error.image_url' })
     .optional()
     .nullable()

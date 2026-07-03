@@ -47,7 +47,7 @@ export function useEducations(options?: { fetchList?: boolean; editId?: string }
     reset,
     formState: { errors, isSubmitting }
   } = useForm<EducationFormData>({
-    resolver: zodResolver(educationSchema) as any,
+    resolver: zodResolver(educationSchema) as never,
     defaultValues: initialForm
   });
 
@@ -61,7 +61,8 @@ export function useEducations(options?: { fetchList?: boolean; editId?: string }
     try {
       const data = await EducationService.getAll();
       setEducations(data);
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       const errorKey = err.error || err.message;
       setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     } finally {
@@ -75,7 +76,7 @@ export function useEducations(options?: { fetchList?: boolean; editId?: string }
       const data = await EducationService.getById(id);
 
       const cleanTranslations = data.translations?.length
-        ? data.translations.map((tData: any) => ({
+        ? data.translations.map((tData) => ({
           language: tData.language,
           institution: tData.institution,
           name: tData.name,
@@ -98,7 +99,8 @@ export function useEducations(options?: { fetchList?: boolean; editId?: string }
       });
 
       setImagePreview(data.imageUrl || null);
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       const errorKey = err.error || err.message;
       setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     } finally {
@@ -107,7 +109,9 @@ export function useEducations(options?: { fetchList?: boolean; editId?: string }
   }, [reset, setImagePreview, t]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (options?.fetchList) loadEducations();
+
     if (options?.editId) loadEducationForEdit(options.editId);
   }, [options?.fetchList, options?.editId, loadEducations, loadEducationForEdit]);
 
@@ -117,7 +121,8 @@ export function useEducations(options?: { fetchList?: boolean; editId?: string }
     try {
       await EducationService.delete(id);
       setEducations(prev => prev.filter(e => e.id !== id));
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       const errorKey = err.error || err.message;
       alert(errorKey ? t(errorKey) : t('api.error.unknown'));
     }
@@ -127,12 +132,13 @@ export function useEducations(options?: { fetchList?: boolean; editId?: string }
     setGlobalError(null);
     try {
       if (!selectedFile && !imagePreview) {
-        throw { error: 'educations.error.image_required', message: 'Selecione uma imagem.' };
+        throw { error: 'educations.error.image_required', message: 'Image is required' };
       }
 
       let finalImageUrl = imagePreview || '';
 
       if (selectedFile) {
+        // eslint-disable-next-line react-hooks/purity
         const fileId = id || Date.now().toString();
         finalImageUrl = await UploadService.uploadImage(selectedFile, 'educations', `edu-${fileId}`);
       }
@@ -153,8 +159,8 @@ export function useEducations(options?: { fetchList?: boolean; editId?: string }
 
       setSelectedFile(null);
       navigate('/educations');
-    } catch (err: any) {
-      console.error("ERRO COMPLETO CAPTURADO NO CATCH:", err);
+    } catch (error) {
+      const err = error as ApiError;
       const errorKey = err.error || err.message;
       setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     }

@@ -133,4 +133,41 @@ describe('EducationForm Component', () => {
     expect(mockRegister).toHaveBeenCalledWith('translations.0.language');
     expect(mockRegister).toHaveBeenCalledWith('translations.0.institution');
   });
+
+  it('should display validation error messages for all fields when errors exist', () => {
+    const mockErrors = {
+      type: { message: 'Error in type' },
+      status: { message: 'Error in status' },
+      startDate: { message: 'Error in startDate' },
+      endDate: { message: 'Error in endDate' },
+      durationHours: { message: 'Error in durationHours' },
+      certificateUrl: { message: 'Error in certificateUrl' },
+      translations: [
+        {
+          language: { message: 'Error in language' },
+          institution: { message: 'Error in institution' },
+          name: { message: 'Error in name' },
+          description: { message: 'Error in description' },
+        }
+      ]
+    };
+
+    render(<EducationForm {...mockProps} errors={mockErrors as any} />);
+
+    expect(screen.getByText('Error in type')).toBeInTheDocument();
+    expect(screen.getByText('Error in status')).toBeInTheDocument();
+    expect(screen.getByText('Error in startDate')).toBeInTheDocument();
+    expect(screen.getByText('Error in endDate')).toBeInTheDocument();
+    expect(screen.getByText('Error in durationHours')).toBeInTheDocument();
+    expect(screen.getByText('Error in certificateUrl')).toBeInTheDocument();
+
+    expect(screen.getByText('Error in language')).toBeInTheDocument();
+    expect(screen.getByText('Error in institution')).toBeInTheDocument();
+    expect(screen.getByText('Error in name')).toBeInTheDocument();
+    expect(screen.getByText('Error in description')).toBeInTheDocument();
+
+    const textarea = screen.getByPlaceholderText('educations.form.placeholders.description');
+    expect(textarea.className).toContain('border-red-500');
+    expect(textarea.className).toContain('bg-red-50');
+  });
 });

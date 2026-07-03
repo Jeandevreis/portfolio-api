@@ -103,4 +103,26 @@ describe('EducationCard Component', () => {
     expect(mockOnDelete).toHaveBeenCalledTimes(1);
     expect(mockOnDelete).toHaveBeenCalledWith(mockEducation.id);
   });
+
+  it('should render fallback texts when names, duration and endDate are missing', () => {
+    vi.mocked(educationHelpers.getEducationData).mockReturnValue('');
+
+    const educationWithoutOptionals = {
+      ...mockEducation,
+      endDate: undefined,
+      durationHours: undefined,
+    };
+
+    render(
+      <MemoryRouter>
+        <EducationCard education={educationWithoutOptionals} onDelete={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    const fallbacks = screen.getAllByText('educations.card.not_defined');
+    expect(fallbacks).toHaveLength(2);
+
+    expect(screen.queryByText(/40h/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Feb 2023')).not.toBeInTheDocument();
+  });
 });

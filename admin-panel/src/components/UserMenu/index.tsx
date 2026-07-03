@@ -19,7 +19,7 @@ export default function UserMenu() {
     try {
       await logout();
       setIsOpen(false);
-    } catch (err) {
+    } catch {
       alert(t('header.error_logout', { defaultValue: 'Error logging out.' }));
     }
   };

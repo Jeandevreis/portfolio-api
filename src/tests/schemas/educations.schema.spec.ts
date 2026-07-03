@@ -118,4 +118,64 @@ describe('Education Zod Schema', () => {
       expect(result.error.issues[0].message).toBe('educations.error.type')
     }
   })
+
+  it('should transform an empty string durationHours to undefined', () => {
+    const payloadWithEmptyDuration = { ...validPayload, durationHours: '' }
+
+    const result = educationSchema.safeParse(payloadWithEmptyDuration)
+
+    expect(result.success).toBe(true)
+    if (result.success) {
+      expect(result.data.durationHours).toBeUndefined()
+    }
+  })
+
+  it('should fail if durationHours is zero or negative', () => {
+    const payloadWithNegativeDuration = { ...validPayload, durationHours: 0 }
+
+    const result = educationSchema.safeParse(payloadWithNegativeDuration)
+
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('educations.error.duration_hours')
+    }
+  })
+
+  it('should validate successfully when optional fields are explicitly null', () => {
+    const payloadWithNulls = {
+      ...validPayload,
+      endDate: null,
+      durationHours: null,
+      imageUrl: null,
+      certificateUrl: null,
+    }
+
+    const result = educationSchema.safeParse(payloadWithNulls)
+
+    expect(result.success).toBe(true)
+  })
+
+  it('should validate successfully when string fields are empty literals', () => {
+    const payloadWithEmptyStrings = {
+      ...validPayload,
+      endDate: '',
+      imageUrl: '',
+      certificateUrl: '',
+    }
+
+    const result = educationSchema.safeParse(payloadWithEmptyStrings)
+
+    expect(result.success).toBe(true)
+  })
+
+  it('should fail if certificateUrl has an invalid format or protocol', () => {
+    const invalidCertUrlPayload = { ...validPayload, certificateUrl: 'ftp://site.com/cert.pdf' }
+
+    const result = educationSchema.safeParse(invalidCertUrlPayload)
+
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe('educations.error.certificate_url')
+    }
+  })
 })

@@ -23,7 +23,8 @@ export default function PanelCard({
   const { t } = useTranslation();
   const isDisabled = type === 'disabled';
 
-  const CardContent = () => (
+  // Transformado de função/componente para uma variável simples guardando JSX
+  const cardContent = (
     <>
       {bgIcon && !isDisabled && (
         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity text-blue-600 dark:text-blue-500">
@@ -66,13 +67,14 @@ export default function PanelCard({
     : 'bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700 cursor-pointer'
     } ${className}`;
 
+  // Usando a variável entre chaves em vez de chamar como componente
   if (type === 'internal') {
-    return <Link to={url} className={baseClasses}><CardContent /></Link>;
+    return <Link to={url} className={baseClasses}>{cardContent}</Link>;
   }
 
   if (type === 'external') {
-    return <a href={url} target="_blank" rel="noreferrer" className={baseClasses}><CardContent /></a>;
+    return <a href={url} target="_blank" rel="noreferrer" className={baseClasses}>{cardContent}</a>;
   }
 
-  return <div className={baseClasses}><CardContent /></div>;
+  return <div className={baseClasses}>{cardContent}</div>;
 }

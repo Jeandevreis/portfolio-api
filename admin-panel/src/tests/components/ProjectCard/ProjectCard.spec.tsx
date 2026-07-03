@@ -85,4 +85,16 @@ describe('ProjectCard', () => {
     expect(mockOnDelete).toHaveBeenCalledTimes(1);
     expect(mockOnDelete).toHaveBeenCalledWith(mockProject.id);
   });
+
+  it('should render fallback title when getProjectData returns falsy', () => {
+    vi.mocked(projectHelpers.getProjectData).mockReturnValue('');
+
+    render(
+      <MemoryRouter>
+        <ProjectCard project={mockProject} onDelete={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('projects.card.not_defined')).toBeInTheDocument();
+  });
 });

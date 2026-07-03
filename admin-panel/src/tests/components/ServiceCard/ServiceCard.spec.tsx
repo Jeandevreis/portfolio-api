@@ -88,4 +88,17 @@ describe('ServiceCard', () => {
     expect(mockOnDelete).toHaveBeenCalledTimes(1);
     expect(mockOnDelete).toHaveBeenCalledWith(mockService.id);
   });
+
+  it('should render fallback title and description when getServiceData returns falsy values', () => {
+    vi.mocked(serviceHelpers.getServiceData).mockReturnValue('');
+
+    render(
+      <MemoryRouter>
+        <ServiceCard service={mockService} onDelete={vi.fn()} />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Title not defined')).toBeInTheDocument();
+    expect(screen.getByText('No description')).toBeInTheDocument();
+  });
 });

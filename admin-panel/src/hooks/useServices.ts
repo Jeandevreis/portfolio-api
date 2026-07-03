@@ -58,7 +58,8 @@ export function useServices(options?: { fetchList?: boolean; editId?: string }) 
     try {
       const data = await ServiceService.getAll();
       setServices(data);
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       setGlobalError(err.error ? t(err.error) : t('api.error.unknown'));
     } finally {
       setLoading(false);
@@ -71,10 +72,10 @@ export function useServices(options?: { fetchList?: boolean; editId?: string }) 
       const data = await ServiceService.getById(id);
 
       const cleanTranslations = data.translations?.length
-        ? data.translations.map((t: any) => ({
-          language: t.language,
-          title: t.title,
-          description: t.description
+        ? data.translations.map((tData) => ({
+          language: tData.language,
+          title: tData.title,
+          description: tData.description
         }))
         : initialForm.translations;
 
@@ -85,7 +86,8 @@ export function useServices(options?: { fetchList?: boolean; editId?: string }) 
       });
 
       setImagePreview(data.imageUrl || null);
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       setGlobalError(err.error ? t(err.error) : t('api.error.unknown'));
     } finally {
       setLoading(false);
@@ -93,7 +95,9 @@ export function useServices(options?: { fetchList?: boolean; editId?: string }) 
   }, [reset, setImagePreview, t]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (options?.fetchList) loadServices();
+
     if (options?.editId) loadServiceForEdit(options.editId);
   }, [options?.fetchList, options?.editId, loadServices, loadServiceForEdit]);
 
@@ -102,7 +106,8 @@ export function useServices(options?: { fetchList?: boolean; editId?: string }) 
     try {
       await ServiceService.delete(id);
       setServices(prev => prev.filter(s => s.id !== id));
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       alert(err.error ? t(err.error) : t('api.error.unknown'));
     }
   };
@@ -114,7 +119,9 @@ export function useServices(options?: { fetchList?: boolean; editId?: string }) 
       let finalImageUrl = imagePreview || '';
 
       if (selectedFile) {
+        // eslint-disable-next-line react-hooks/purity
         const fileId = id || Date.now().toString();
+
         finalImageUrl = await UploadService.uploadImage(selectedFile, 'services', `srv-${fileId}`);
       }
 
@@ -128,7 +135,8 @@ export function useServices(options?: { fetchList?: boolean; editId?: string }) 
 
       setSelectedFile(null);
       navigate('/services');
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       const errorKey = err.error;
       setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     }

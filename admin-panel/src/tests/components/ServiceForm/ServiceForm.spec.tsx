@@ -124,4 +124,34 @@ describe('ServiceForm', () => {
     expect(defaultProps.removeTranslation).toHaveBeenCalledTimes(1);
     expect(defaultProps.removeTranslation).toHaveBeenCalledWith(1);
   });
+
+  it('should render link error and apply error class to textarea when errors exist', () => {
+    const mockErrors = {
+      link: { message: 'invalid_url', type: 'pattern' },
+      translations: [{ description: { message: 'desc_required', type: 'required' } }]
+    };
+
+    render(<ServiceForm {...defaultProps} errors={mockErrors as any} />);
+
+    expect(screen.getByText('invalid_url')).toBeInTheDocument();
+
+    expect(screen.getByText('desc_required')).toBeInTheDocument();
+    const textarea = screen.getByPlaceholderText(/Describe the service/i);
+    expect(textarea.className).toContain('border-red-500');
+  });
+
+  it('should apply default border class when no error exists', () => {
+    render(<ServiceForm {...defaultProps} errors={{}} />);
+
+    const textarea = screen.getByPlaceholderText(/Describe the service/i);
+    expect(textarea.className).not.toContain('border-red-500');
+    expect(textarea.className).toContain('border-zinc-200');
+  });
+
+  it('should NOT render error messages when fields are valid', () => {
+    render(<ServiceForm {...defaultProps} errors={{}} />);
+
+    expect(screen.queryByText('errors.invalid_url')).not.toBeInTheDocument();
+    expect(screen.queryByText('errors.required')).not.toBeInTheDocument();
+  });
 });

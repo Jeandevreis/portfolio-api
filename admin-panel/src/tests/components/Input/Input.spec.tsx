@@ -103,4 +103,15 @@ describe('Input Component', () => {
     expect(input).toBeRequired();
     expect(input).toHaveAttribute('maxlength', '50');
   });
+
+  it('should not throw an error if the user types and onChange is not provided', async () => {
+    const user = userEvent.setup();
+    render(<Input id="no-onChange" label="No OnChange" placeholder="Type here" />);
+
+    const input = screen.getByPlaceholderText('Type here');
+
+    await user.type(input, 'test');
+
+    expect(input).toHaveValue('test');
+  });
 });

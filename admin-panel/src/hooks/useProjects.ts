@@ -59,7 +59,8 @@ export function useProjects(options?: { fetchList?: boolean; editId?: string }) 
     try {
       const data = await ProjectService.getAll();
       setProjects(data);
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       const errorKey = err.error || err.message;
       setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     } finally {
@@ -73,7 +74,7 @@ export function useProjects(options?: { fetchList?: boolean; editId?: string }) 
       const data = await ProjectService.getById(id);
 
       const cleanTranslations = data.translations?.length
-        ? data.translations.map((tData: any) => ({
+        ? data.translations.map((tData) => ({
           language: tData.language,
           title: tData.title,
           description: tData.description
@@ -88,7 +89,8 @@ export function useProjects(options?: { fetchList?: boolean; editId?: string }) 
       });
 
       setImagePreview(data.imageUrl || null);
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       const errorKey = err.error || err.message;
       setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     } finally {
@@ -97,7 +99,9 @@ export function useProjects(options?: { fetchList?: boolean; editId?: string }) 
   }, [reset, setImagePreview, t]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (options?.fetchList) loadProjects();
+
     if (options?.editId) loadProjectForEdit(options.editId);
   }, [options?.fetchList, options?.editId, loadProjects, loadProjectForEdit]);
 
@@ -107,7 +111,8 @@ export function useProjects(options?: { fetchList?: boolean; editId?: string }) 
     try {
       await ProjectService.delete(id);
       setProjects(prev => prev.filter(p => p.id !== id));
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       const errorKey = err.error || err.message;
       alert(errorKey ? t(errorKey) : t('api.error.unknown'));
     }
@@ -119,6 +124,7 @@ export function useProjects(options?: { fetchList?: boolean; editId?: string }) 
       let finalImageUrl = imagePreview || '';
 
       if (selectedFile) {
+        // eslint-disable-next-line react-hooks/purity
         const fileId = id || Date.now().toString();
         finalImageUrl = await UploadService.uploadImage(selectedFile, 'projects', `proj-${fileId}`);
       }
@@ -133,8 +139,9 @@ export function useProjects(options?: { fetchList?: boolean; editId?: string }) 
 
       setSelectedFile(null);
       navigate('/projects');
-    } catch (err: any) {
-      console.error("ERRO COMPLETO CAPTURADO NO CATCH:", err);
+    } catch (error) {
+      const err = error as ApiError;
+
       const errorKey = err.error || err.message;
       setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));
     }

@@ -34,18 +34,18 @@ export default function Profile() {
 
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('profile.title', { defaultValue: 'Meu Perfil' })}</h1>
-              <p className="text-sm text-gray-500 dark:text-zinc-400">{t('profile.description', { defaultValue: 'Gerencie suas informações cadastrais e segurança da conta.' })}</p>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('profile.title', { defaultValue: 'My Profile' })}</h1>
+              <p className="text-sm text-gray-500 dark:text-zinc-400">{t('profile.description', { defaultValue: 'Manage your account information and security.' })}</p>
             </div>
             <Link to="/panel" className="text-sm text-gray-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 font-medium flex items-center gap-1 transition-colors">
-              ← {t('profile.back', { defaultValue: 'Voltar ao painel' })}
+              ← {t('profile.back', { defaultValue: 'Back to Dashboard' })}
             </Link>
           </div>
 
           <form onSubmit={updateProfileSubmit} className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-700 overflow-hidden">
             <div className="p-6 md:p-8 space-y-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 border-b border-gray-100 dark:border-zinc-700 pb-3">
-                👤 {t('profile.sections.personal_info', { defaultValue: 'Informações Pessoais' })}
+                👤 {t('profile.sections.personal_info', { defaultValue: 'Personal Information' })}
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
@@ -57,9 +57,9 @@ export default function Profile() {
                   <div>
                     <Input
                       id="name"
-                      label={t('profile.labels.name', { defaultValue: 'Nome Completo' })}
+                      label={t('profile.labels.name', { defaultValue: 'Full Name' })}
                       type="text"
-                      placeholder={t('profile.placeholders.name', { defaultValue: 'Seu nome completo' })}
+                      placeholder={t('profile.placeholders.name', { defaultValue: 'Your Full Name' })}
                       {...profileRegister('name')}
                     >
                       <IconWrapper>📝</IconWrapper>
@@ -72,9 +72,9 @@ export default function Profile() {
                   <div>
                     <Input
                       id="email"
-                      label={t('profile.labels.email', { defaultValue: 'E-mail de Acesso' })}
+                      label={t('profile.labels.email', { defaultValue: 'Email' })}
                       type="email"
-                      placeholder={t('profile.placeholders.email', { defaultValue: 'seu.email@exemplo.com' })}
+                      placeholder={t('profile.placeholders.email', { defaultValue: 'your.email@example.com' })}
                       {...profileRegister('email')}
                     >
                       <IconWrapper>📧</IconWrapper>
@@ -86,17 +86,34 @@ export default function Profile() {
                 </div>
               </div>
 
-              {globalErrorProfile && <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded text-red-700 dark:text-red-400 text-sm">{globalErrorProfile}</div>}
-              {successProfile && <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 rounded text-green-700 dark:text-green-400 text-sm">{t('profile.messages.profile_success', { defaultValue: 'Perfil atualizado com sucesso!' })}</div>}
+              {globalErrorProfile &&
+                <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded text-red-700 dark:text-red-400 text-sm">
+                  {globalErrorProfile}
+                </div>
+              }
+
+              {successProfile &&
+                <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 rounded text-green-700 dark:text-green-400 text-sm">
+                  {t('profile.messages.profile_success', { defaultValue: 'Profile updated successfully' })}
+                </div>
+              }
             </div>
 
-            <div className="bg-gray-50 dark:bg-zinc-900 px-6 py-4 flex items-center justify-end border-t border-gray-200 dark:border-zinc-700">
+            <div className="
+               bg-gray-50 dark:bg-zinc-900 px-6 py-4 flex items-center justify-end border-t 
+               border-gray-200 dark:border-zinc-700
+              "
+            >
               <button
                 type="submit"
                 disabled={isSubmittingProfile}
-                className="cursor-pointer inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all"
+                className="
+                  cursor-pointer inline-flex items-center px-6 py-2 border border-transparent text-sm 
+                  font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none 
+                  focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all
+                "
               >
-                {isSubmittingProfile ? t('profile.buttons.saving', { defaultValue: 'Salvando...' }) : t('profile.buttons.save_profile', { defaultValue: 'Salvar Perfil' })}
+                {isSubmittingProfile ? t('profile.buttons.saving', { defaultValue: 'Saving...' }) : t('profile.buttons.save_profile', { defaultValue: 'Save Profile' })}
               </button>
             </div>
           </form>
@@ -104,14 +121,14 @@ export default function Profile() {
           <form onSubmit={updatePasswordSubmit} className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-700 overflow-hidden">
             <div className="p-6 md:p-8 space-y-6">
               <h2 className="text-lg font-bold text-gray-900 dark:text-zinc-100 border-b border-gray-100 dark:border-zinc-700 pb-3">
-                🔒 {t('profile.sections.security', { defaultValue: 'Segurança e Senha' })}
+                🔒 {t('profile.sections.security', { defaultValue: 'Security and Password' })}
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <Input
                     id="oldPassword"
-                    label={t('profile.labels.old_password', { defaultValue: 'Senha Atual' })}
+                    label={t('profile.labels.old_password', { defaultValue: 'Current Password' })}
                     type="password"
                     placeholder="••••••••"
                     {...passwordRegister('oldPassword')}
@@ -126,7 +143,7 @@ export default function Profile() {
                 <div>
                   <Input
                     id="newPassword"
-                    label={t('profile.labels.new_password', { defaultValue: 'Nova Senha' })}
+                    label={t('profile.labels.new_password', { defaultValue: 'New Password' })}
                     type="password"
                     placeholder="••••••••"
                     {...passwordRegister('newPassword')}
@@ -141,7 +158,7 @@ export default function Profile() {
                 <div>
                   <Input
                     id="confirmPassword"
-                    label={t('profile.labels.confirm_password', { defaultValue: 'Confirmar Nova Senha' })}
+                    label={t('profile.labels.confirm_password', { defaultValue: 'Confirm New Password' })}
                     type="password"
                     placeholder="••••••••"
                     {...passwordRegister('confirmPassword')}
@@ -155,7 +172,7 @@ export default function Profile() {
               </div>
 
               {globalErrorPassword && <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded text-red-700 dark:text-red-400 text-sm">{globalErrorPassword}</div>}
-              {successPassword && <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 rounded text-green-700 dark:text-green-400 text-sm">{t('profile.messages.password_success', { defaultValue: 'Senha alterada com sucesso!' })}</div>}
+              {successPassword && <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 rounded text-green-700 dark:text-green-400 text-sm">{t('profile.messages.password_success', { defaultValue: 'Password updated successfully' })}</div>}
             </div>
 
             <div className="bg-gray-50 dark:bg-zinc-900 px-6 py-4 flex items-center justify-end border-t border-gray-200 dark:border-zinc-700">
@@ -164,7 +181,7 @@ export default function Profile() {
                 disabled={isSubmittingPassword}
                 className="cursor-pointer inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all"
               >
-                {isSubmittingPassword ? t('profile.buttons.updating', { defaultValue: 'Alterando...' }) : t('profile.buttons.update_password', { defaultValue: 'Atualizar Senha' })}
+                {isSubmittingPassword ? t('profile.buttons.updating', { defaultValue: 'Updating...' }) : t('profile.buttons.update_password', { defaultValue: 'Update Password' })}
               </button>
             </div>
           </form>

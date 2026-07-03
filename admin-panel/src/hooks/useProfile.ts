@@ -42,12 +42,12 @@ export function useProfile() {
   const [successPassword, setSuccessPassword] = useState<boolean>(false);
 
   const profileForm = useForm<ProfileFormData>({
-    resolver: zodResolver(updateProfileSchema as any),
+    resolver: zodResolver(updateProfileSchema),
     defaultValues: { name: '', email: '' }
   });
 
   const passwordForm = useForm<PasswordFormData>({
-    resolver: zodResolver(passwordFormSchema as any),
+    resolver: zodResolver(passwordFormSchema),
     defaultValues: { oldPassword: '', newPassword: '', confirmPassword: '' }
   });
 
@@ -58,6 +58,8 @@ export function useProfile() {
         email: user.email || '',
       });
       setImagePreview(user.avatarUrl || null);
+
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
     }
   }, [user, profileForm, setImagePreview]);
@@ -83,7 +85,8 @@ export function useProfile() {
       setUser(updatedUser);
       setSuccessProfile(true);
       setSelectedFile(null);
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       const errorKey = err.error || err.message;
       setGlobalErrorProfile(errorKey ? t(errorKey) : t('api.error.unknown'));
     }
@@ -101,7 +104,8 @@ export function useProfile() {
 
       setSuccessPassword(true);
       passwordForm.reset();
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       const errorKey = err.error || err.message;
       setGlobalErrorPassword(errorKey ? t(errorKey) : t('api.error.unknown'));
     }

@@ -42,7 +42,8 @@ export default function Login() {
     try {
       await login(data.email, data.password);
 
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
 
       const errorKey = err.error || err.message;
       setGlobalError(errorKey ? t(errorKey) : t('api.error.unknown'));

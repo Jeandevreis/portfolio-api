@@ -69,4 +69,18 @@ describe('PanelCard', () => {
 
     expect(screen.getByText('panel_card.access')).toBeInTheDocument();
   });
+
+  it('should render bgIcon when provided and not disabled', () => {
+    render(
+      <MemoryRouter>
+        <PanelCard
+          {...mockProps}
+          type="internal"
+          bgIcon={<span data-testid="bg-icon" />}
+        />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByTestId('bg-icon')).toBeInTheDocument();
+  });
 });

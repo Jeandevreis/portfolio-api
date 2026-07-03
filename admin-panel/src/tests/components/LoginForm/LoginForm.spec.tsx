@@ -10,7 +10,6 @@ vi.mock('react-i18next', () => ({
   })
 }));
 
-// FIXED: Extracted 'children' so it doesn't get spread into the <input>
 vi.mock('@/components/Input', () => ({
   default: React.forwardRef(({ label, children, ...props }: any, ref: any) => (
     <div data-testid="input-wrapper">
@@ -83,5 +82,17 @@ describe('LoginForm', () => {
 
     expect(mockHandleSubmit).toHaveBeenCalled();
     expect(mockOnSubmit).toHaveBeenCalled();
+  });
+
+  it('should display specific field errors when provided', () => {
+    const errors = {
+      email: { message: 'login.error.email', type: 'required' },
+      password: { message: 'login.error.password', type: 'required' }
+    };
+
+    render(<LoginForm {...defaultProps} errors={errors as any} />);
+
+    expect(screen.getByText('login.error.email')).toBeInTheDocument();
+    expect(screen.getByText('login.error.password')).toBeInTheDocument(); // Verificamos se ele renderiza
   });
 });

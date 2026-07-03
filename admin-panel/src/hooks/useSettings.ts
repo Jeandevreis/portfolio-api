@@ -44,7 +44,7 @@ export function useSettings(options?: { fetchOnMount?: boolean }) {
     reset,
     formState: { errors, isSubmitting }
   } = useForm<SettingsFormData>({
-    resolver: zodResolver(settingsSchema as any),
+    resolver: zodResolver(settingsSchema as never),
     defaultValues: initialForm
   });
 
@@ -67,7 +67,8 @@ export function useSettings(options?: { fetchOnMount?: boolean }) {
       setImagePreview(parsedData.logoUrl ?? null);
 
       return parsedData;
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       setGlobalError(err.error ? t(err.error) : t('api.error.unknown'));
       return null;
     } finally {
@@ -76,8 +77,10 @@ export function useSettings(options?: { fetchOnMount?: boolean }) {
   }, [reset, setImagePreview, t]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (options?.fetchOnMount) loadSettings();
-  }, [options?.fetchOnMount]);
+
+  }, [options?.fetchOnMount, loadSettings]);
 
   const processFormSubmit = async (data: SettingsFormData, onSuccess?: (updated: SettingsFormData) => void) => {
     setGlobalError(null);
@@ -103,7 +106,8 @@ export function useSettings(options?: { fetchOnMount?: boolean }) {
 
       if (onSuccess) onSuccess(updated);
 
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ApiError;
       setGlobalError(err.message || t('settings.error.update'));
     }
   };

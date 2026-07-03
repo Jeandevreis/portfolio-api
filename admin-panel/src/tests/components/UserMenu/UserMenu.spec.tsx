@@ -84,4 +84,86 @@ describe('UserMenu', () => {
 
     expect(mockLogout).not.toHaveBeenCalled();
   });
+
+  it('should close dropdown when clicking outside', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <UserMenu />
+      </MemoryRouter>
+    );
+
+    await user.click(screen.getByRole('button', { name: /john doe/i }));
+    expect(screen.getByText(/my profile/i)).toBeInTheDocument();
+
+    await user.click(document.body);
+
+    expect(screen.queryByText(/my profile/i)).not.toBeInTheDocument();
+  });
+
+  it('should show alert when logout fails', async () => {
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => { });
+
+    mockLogout.mockRejectedValueOnce(new Error('API Error'));
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <UserMenu />
+      </MemoryRouter>
+    );
+
+    await user.click(screen.getByRole('button', { name: /john doe/i }));
+    await user.click(screen.getByRole('button', { name: /logout/i }));
+
+    expect(alertSpy).toHaveBeenCalled();
+    alertSpy.mockRestore(); // Limpa o spy
+  });
+
+  it('should render Admin fallback when user name is missing', () => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: { name: null, avatarUrl: null },
+      logout: mockLogout
+    } as any);
+
+    render(
+      <MemoryRouter>
+        <UserMenu />
+      </MemoryRouter>
+    );
+
+    expect(screen.getByText('Admin')).toBeInTheDocument();
+  });
+
+  it('should close dropdown when profile link is clicked', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <UserMenu />
+      </MemoryRouter>
+    );
+
+    await user.click(screen.getByRole('button', { name: /john doe/i }));
+
+    const profileLink = screen.getByRole('link', { name: /my profile/i });
+    await user.click(profileLink);
+
+    expect(screen.queryByRole('link', { name: /my profile/i })).not.toBeInTheDocument();
+  });
+
+  it('should render user avatar image when avatarUrl is provided', () => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: { name: 'John Doe', avatarUrl: 'https://example.com/avatar.jpg' },
+      logout: vi.fn()
+    } as any);
+
+    render(
+      <MemoryRouter>
+        <UserMenu />
+      </MemoryRouter>
+    );
+
+    const avatarImg = screen.getByRole('img', { name: /perfil/i });
+    expect(avatarImg).toBeInTheDocument();
+    expect(avatarImg).toHaveAttribute('src', 'https://example.com/avatar.jpg');
+  });
 });
