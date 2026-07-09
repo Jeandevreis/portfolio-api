@@ -1,7 +1,7 @@
 {
   "routes": [
     {
-      "src": "/(?!api|auth).*",
+      "src": "/(?!api|auth|.*\\.).*",
       "dest": "/index.html"
     }
   ]
